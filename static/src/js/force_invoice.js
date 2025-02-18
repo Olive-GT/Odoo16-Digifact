@@ -6,7 +6,7 @@ odoo.define('digifact.force_invoice', function(require) {
     const { patch } = require("@web/core/utils/patch");
     const PaymentScreen = require("point_of_sale.PaymentScreen");
 
-    patch(PaymentScreen.prototype, {
+    patch(PaymentScreen.prototype, "digifact_patch_force_invoice", {
         setup() {
             this._super.apply(this, arguments);
             console.warn("Forzando to_invoice=True en todas las órdenes.");

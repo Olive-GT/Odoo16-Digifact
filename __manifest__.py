@@ -1,17 +1,18 @@
 {
-    'name': 'POS Remove Invoice Button',
+    'name': 'POS Facturación Obligatoria',
     'version': '16.0.1.0.0',
     'category': 'Point of Sale',
-    'summary': 'Oculta el botón de facturación en el POS de Odoo 16.',
-    'author': 'Tu Nombre o Empresa',
+    'summary': 'Forza la facturación en el POS de Odoo 16, evitando ventas sin factura.',
+    'author': 'Olive Tech',
     'depends': ['point_of_sale'],
     'data': ['views/assets.xml'],
     'assets': {
         'point_of_sale._assets_pos': [
-            'digifact/static/src/js/remove_invoice.js',
+            'digifact/static/src/js/force_invoice.js',
+            'digifact/static/src/css/hide_invoice.css',
         ],
     },
-    'installable': False,
+    'installable': True,
     'application': False,
     'license': 'LGPL-3',
 }

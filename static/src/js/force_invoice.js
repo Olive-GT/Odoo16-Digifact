@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-const { patch } = require("@web/core/utils/patch");
-const { PaymentScreen } = require("@point_of_sale/app/screens/payment_screen/payment_screen");
+import { patch } from "@web/core/utils/patch";
+import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 
 patch(PaymentScreen.prototype, {
     setup() {

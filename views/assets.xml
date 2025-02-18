@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="assets_backend" name="Custom Module Assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/digifact/static/src/js/script.js"/>
+            <link rel="stylesheet" type="text/css" href="/digifact/static/src/css/styles.css"/>
+        </xpath>
+    </template>
 </odoo>

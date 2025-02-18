@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data inherit_id="point_of_sale.pos_assets_backend" name="Fix POS Assets">
+    <data inherit_id="point_of_sale.assets" name="Fix POS Assets">
         <xpath expr="." position="inside">
             <!-- <script type="module" src="/digifact/static/src/js/remove_invoice.js"/> -->
         </xpath>

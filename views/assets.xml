@@ -1,8 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data inherit_id="web.assets_common" name="Fix POS Assets">
-        <xpath expr="." position="inside">
-            <!-- <script type="module" src="/digifact/static/src/js/remove_invoice.js"/> -->
-        </xpath>
-    </data>
 </odoo>

@@ -8,7 +8,7 @@
     'data': ['views/assets.xml'],
     'assets': {
         'point_of_sale.assets': [
-            'pos_remove_invoice_button/static/src/js/remove_invoice.js',
+            'digifact/static/src/js/remove_invoice.js',
         ],
     },
     'installable': True,

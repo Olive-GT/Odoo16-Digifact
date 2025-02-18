@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <template id="assets" inherit_id="point_of_sale._assets_pos" name="Remove Invoice Button from POS">
+        <template id="assets" inherit_id="pos.assets" name="Remove Invoice Button from POS">
             <xpath expr="." position="inside">
-                <script type="module" src="/pos_remove_invoice_button/static/src/js/remove_invoice.js"/>
+                <script type="module" src="/digifact/static/src/js/remove_invoice.js"/>
             </xpath>
         </template>
     </data>

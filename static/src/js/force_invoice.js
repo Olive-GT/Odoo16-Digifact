@@ -6,20 +6,20 @@ import { Order } from "@point_of_sale/app/store/models";
 patch(Order.prototype, {
     setup() {
         this._super.apply(this, arguments);
-        this.to_invoice = true; // Mantener la facturación activada
+        this.to_invoice = true; // Asegurar facturación siempre activada
     },
 
     is_to_invoice() {
-        return true; // Asegurar que siempre esté activo
+        return true; // Devuelve siempre true
     },
 
     toggleIsToInvoice() {
-        // Evita que el usuario pueda apagar la opción
-        return;
+        console.warn("Intento de cambiar to_invoice bloqueado."); // Debugging
+        return; // Bloquea completamente el toggle en el frontend
     },
 
     set_to_invoice(value) {
-        // Forzar siempre to_invoice en true
-        this.to_invoice = true;
+        console.warn("Intento de cambiar set_to_invoice bloqueado."); // Debugging
+        this.to_invoice = true; // Siempre mantener true
     }
 });

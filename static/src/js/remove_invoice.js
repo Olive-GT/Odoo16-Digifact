@@ -1,18 +1,13 @@
 /** @odoo-module **/
+import { PosOrderScreen } from "@point_of_sale/app/screens/order_screen/order_screen";
 import { patch } from "@web/core/utils/patch";
-import { Order } from "@point_of_sale/app/store/models";
 
-patch(Order.prototype, {
+// Parcheamos el OrderScreen para ocultar el botón de facturación
+patch(PosOrderScreen.prototype, {
     setup() {
         this._super.apply(this, arguments);
-        this.isToInvoice = false; // Deshabilita la opción de facturación
     },
-});
-
-// Ocultar el botón en la interfaz
-patch(Order, "remove_invoice_button", (Order) => {
-    Order.prototype.init = function () {
-        this._super.apply(this, arguments);
-        this.isToInvoice = false; // Desactiva la opción de facturación
-    };
+    get orderButtons() {
+        return this._super().filter(button => button.name !== "InvoiceButton");
+    },
 });

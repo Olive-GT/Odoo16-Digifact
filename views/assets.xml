@@ -2,7 +2,7 @@
 <odoo>
     <template id="force_invoice_assets" inherit_id="point_of_sale.assets_common">
         <xpath expr="." position="inside">
-            <script type="module" src="/digifact/static/src/js/force_invoice.js"/>
+            <script type="text/javascript" src="/digifact/static/src/js/force_invoice.js"/>
             <link rel="stylesheet" type="text/css" href="/digifact/static/src/css/hide_invoice.css"/>
         </xpath>
     </template>

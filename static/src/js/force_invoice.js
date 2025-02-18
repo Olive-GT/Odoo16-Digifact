@@ -1,20 +1,24 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
-import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
+odoo.define('digifact.force_invoice', function(require) {
+    "use strict";
 
-patch(PaymentScreen.prototype, {
-    setup() {
-        this._super.apply(this, arguments);
-        console.warn("Forzando to_invoice=True en todas las órdenes.");
-        const order = this.env.pos.get_order();
-        if (order) {
-            order.set_to_invoice(true);
+    const { patch } = require("@web/core/utils/patch");
+    const PaymentScreen = require("point_of_sale.PaymentScreen");
+
+    patch(PaymentScreen.prototype, {
+        setup() {
+            this._super.apply(this, arguments);
+            console.warn("Forzando to_invoice=True en todas las órdenes.");
+            const order = this.env.pos.get_order();
+            if (order) {
+                order.set_to_invoice(true);
+            }
+        },
+
+        toggleIsToInvoice() {
+            console.warn("Intento de cambiar to_invoice bloqueado!");
+            return; // Bloquea el botón, no permite cambios
         }
-    },
-
-    toggleIsToInvoice() {
-        console.warn("Intento de cambiar to_invoice bloqueado!");
-        return; // Bloquea el botón, no permite cambios
-    }
+    });
 });

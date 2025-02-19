@@ -135,7 +135,7 @@ class PosOrder(models.Model):
 
             # 🔹 Guardar el pedido en estado "error"
             self.write({"state": "error"})
-            #self.message_post(body=f"⚠ Error en certificación FEL: {str(e)}")
+            self.write({"note": f"⚠ Error en certificación FEL: {str(e)}"})  # Agregar el error a las notas
 
             # 🔹 Exportar el pedido fallido a CSV y JSON
             self._export_failed_order(str(e))

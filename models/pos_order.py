@@ -8,7 +8,7 @@ from odoo import models, fields, api, _
 _logger = logging.getLogger(__name__)
 
 class PosOrder(models.Model):
-    _inherit = 'pos.order'
+    _inherit = ['pos.order', 'mail.thread']
 
     to_invoice = fields.Boolean(default=True)  # Siempre forzar facturación
     fel_certification_number = fields.Char("Número de Certificación FEL")

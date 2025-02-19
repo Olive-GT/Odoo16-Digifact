@@ -13,6 +13,7 @@ odoo.define('digifact.force_invoice', function(require) {
             const order = this.env.pos.get_order();
             if (order) {
                 order.set_to_invoice(true);
+                this.render(true); // 👈 FORZAR ACTUALIZACIÓN DE LA UI
             }
         },
 

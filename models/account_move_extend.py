@@ -10,6 +10,7 @@ class AccountMove(models.Model):
     fel_reference = fields.Char("FEL Referencia")
     fel_number = fields.Char("FEL Número de Factura")
     fel_authorization_number = fields.Char("FEL Número de Autorización")
+    fel_certificate_date = fields.Char("FEL Fecha de Certificación")
 
     @api.depends("fel_number", "fel_authorization_number")  
     def _compute_qr_code_fel(self):

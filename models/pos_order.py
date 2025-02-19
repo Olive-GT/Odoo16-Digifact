@@ -87,9 +87,9 @@ class PosOrder(models.Model):
 
         _logger.info("Datos de la factura a enviar a SAT: %s", invoice_data)
         return {
-                    "fel_certification_number": "1234567890",
-                    "fel_series": "A",
-                    "fel_uuid": "1234567890",
+                    "fel_number": "1234567890",
+                    "fel_reference": "A",
+                    "fel_authorization_number": "1234567890",
                     "fel_certificate_date": "2021-01-01 12:00:00"
                 }
 

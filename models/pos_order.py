@@ -8,7 +8,7 @@ from odoo import models, fields, api, _
 _logger = logging.getLogger(__name__)
 
 class PosOrder(models.Model):
-    _inherit = ['pos.order', 'mail.thread']
+    _inherit = 'pos.order'
 
     to_invoice = fields.Boolean(default=True)  # Siempre forzar facturación
     fel_certification_number = fields.Char("Número de Certificación FEL")
@@ -135,7 +135,7 @@ class PosOrder(models.Model):
 
             # 🔹 Guardar el pedido en estado "error"
             self.write({"state": "error"})
-            self.message_post(body=f"⚠ Error en certificación FEL: {str(e)}")
+            #self.message_post(body=f"⚠ Error en certificación FEL: {str(e)}")
 
             # 🔹 Exportar el pedido fallido a CSV y JSON
             self._export_failed_order(str(e))

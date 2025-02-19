@@ -4,7 +4,7 @@ odoo.define('digifact.force_invoice', function(require) {
     "use strict";
 
     const { patch } = require("@web/core/utils/patch");
-    const { PaymentScreen } = require("point_of_sale/app/screens/payment_screen/payment_screen");
+    const PaymentScreen = require("point_of_sale.PaymentScreen");
 
     patch(PaymentScreen.prototype, "digifact_patch_force_invoice", {
         setup() {

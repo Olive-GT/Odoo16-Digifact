@@ -7,24 +7,24 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     qr_code = fields.Binary("Código QR", compute="_compute_qr_code_fel", store=True)
-    reference = fields.Char("Referencia")
-    number = fields.Char("Número de Factura")
-    authorization_number = fields.Char("Número de Autorización")
+    fel_reference = fields.Char("FEL Referencia")
+    fel_number = fields.Char("FEL Número de Factura")
+    fel_authorization_number = fields.Char("FEL Número de Autorización")
 
-    @api.depends("number", "authorization_number")  
+    @api.depends("fel_number", "fel_authorization_number")  
     def _compute_qr_code_fel(self):
-        """ Genera el código QR cada vez que se cambia el número de factura o autorización """
+        """Genera el código QR cada vez que se cambia el número de factura FEL o autorización"""
         for record in self:
             record.qr_code = record._generate_qr_code_fel()
 
     def _generate_qr_code_fel(self):
-        """ Método que puede ser llamado en QWeb para obtener el QR """
+        """Método que puede ser llamado en QWeb para obtener el QR"""
         # Si no hay número o autorización, retornar vacío
-        if not self.number or not self.authorization_number:
+        if not self.fel_number or not self.fel_authorization_number:
             return ""
 
         # Definir la URL personalizada para el QR
-        qr_url = f"https://olive.gt/factura/{self.number}/{self.authorization_number}"
+        qr_url = f"https://olive.gt/factura/{self.fel_number}/{self.fel_authorization_number}"
 
         # Generar el código QR
         qr = qrcode.QRCode(

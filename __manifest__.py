@@ -5,7 +5,10 @@
     'summary': 'Forza la facturación en el POS de Odoo 16, evitando ventas sin factura.',
     'author': 'Olive Tech',
     'depends': ['point_of_sale'],
-    'data': ['views/assets.xml'],
+    'data': [
+        'views/assets.xml',
+        'views/account_move_views.xml',
+        ],
     'assets': {
         'point_of_sale._assets_pos': [
             'digifact/static/src/js/force_invoice.js',

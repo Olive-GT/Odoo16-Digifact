@@ -1,0 +1,15 @@
+<odoo>
+    <record id="view_company_form_inherit_fel" model="ir.ui.view">
+        <field name="name">res.company.form.inherit.fel</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Configuración FEL">
+                    <field name="fel_user"/>
+                    <field name="fel_password"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

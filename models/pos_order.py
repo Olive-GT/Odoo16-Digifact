@@ -1,7 +1,9 @@
 import logging
 import requests
 import json
-from odoo import models, fields, api
+import csv
+import os
+from odoo import models, fields, api, _
 
 _logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ class PosOrder(models.Model):
     fel_series = fields.Char("Serie FEL")
     fel_uuid = fields.Char("UUID FEL")  # Número único de certificación
     fel_certificate_date = fields.Datetime("Fecha de Certificación FEL")
-
+    state = fields.Selection(selection_add=[('error', 'Error en Certificación')])  # Nuevo estado
 
     @api.model
     def create(self, vals):
@@ -84,7 +86,7 @@ class PosOrder(models.Model):
         }
 
         _logger.info("Datos de la factura a enviar a SAT: %s", invoice_data)
-        return True
+
         try:
             # Enviar la solicitud POST a la API de la SAT
             response = requests.post(api_url, headers=headers, json=invoice_data, timeout=10)
@@ -109,17 +111,65 @@ class PosOrder(models.Model):
         """
         self.ensure_one()
 
-        # 🔹 2️⃣ Enviar factura a la API SAT y obtener datos de certificación
         try:
+            # 🔹 Enviar factura a la API SAT y obtener datos de certificación
             certification_data = self._certify_invoice_with_sat()
+
+            # 🔹 Llamamos a la función original de Odoo para crear la factura
+            new_move = super(PosOrder, self)._create_invoice(move_vals)
+
+            # 🔹 Guardamos los datos de certificación en la factura creada
+            new_move.write(certification_data)  # Guarda datos en `account.move`
+            self.write(certification_data)  # Guarda datos en `pos.order`
+
+            return new_move
+
         except Exception as e:
+            _logger.error(f"❌ Error en la certificación FEL: {str(e)}")
+
+            # 🔹 Guardar el pedido en estado "error"
+            self.write({"state": "error"})
+            self.message_post(body=f"⚠ Error en certificación FEL: {str(e)}")
+
+            # 🔹 Exportar el pedido fallido a CSV y JSON
+            self._export_failed_order(str(e))
+
             raise ValueError(f"Error en la certificación FEL: {str(e)}")
 
-        # 🔹 3️⃣ Llamamos a la función original de Odoo para crear la factura
-        new_move = super(PosOrder, self)._create_invoice(move_vals)
+    def _export_failed_order(self, error_message):
+        """
+        Guarda los pedidos con error en un archivo CSV y JSON.
+        """
+        file_path_csv = "/opt/odoo/custom_addons/digifact/data/failed_orders.csv"
+        file_path_json = "/opt/odoo/custom_addons/digifact/data/failed_orders.json"
 
-        # 🔹 4️⃣ Guardamos los datos de certificación en la factura creada
-        #new_move.write(certification_data)  # Guarda datos en `account.move`
-        #self.write(certification_data)  # Guarda datos en `pos.order`
+        # Datos del pedido
+        order_data = {
+            "order_name": self.name,
+            "pos_reference": self.pos_reference,
+            "customer": self.partner_id.name if self.partner_id else "Sin Cliente",
+            "amount_total": self.amount_total,
+            "error_message": error_message
+        }
 
-        return new_move
+        # Guardar en CSV
+        file_exists = os.path.isfile(file_path_csv)
+        with open(file_path_csv, mode="a", newline="") as file:
+            writer = csv.writer(file)
+            if not file_exists:
+                writer.writerow(["Order Name", "POS Reference", "Customer", "Amount Total", "Error Message"])
+            writer.writerow(order_data.values())
+
+        # Guardar en JSON
+        try:
+            with open(file_path_json, "r") as json_file:
+                failed_orders = json.load(json_file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            failed_orders = []
+
+        failed_orders.append(order_data)
+
+        with open(file_path_json, "w") as json_file:
+            json.dump(failed_orders, json_file, indent=4)
+
+        _logger.info(f"📂 Pedido con error guardado en {file_path_csv} y {file_path_json}")

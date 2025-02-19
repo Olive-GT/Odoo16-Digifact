@@ -80,7 +80,7 @@ class PosOrder(models.Model):
             "Content-Type": "application/json",
         }
 
-        print(invoice_data)
+        _logger.info("Datos de la factura a enviar a SAT: %s", invoice_data)
         return True
         try:
             # Enviar la solicitud POST a la API de la SAT

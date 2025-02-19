@@ -37,8 +37,13 @@ class PosOrder(models.Model):
         token_data = json.loads(company.fel_token or '{}')
 
         # Verificar si el token ha expirado
+        _logger.info("Token data: %s", token_data)
         token_expiry = fields.Datetime.from_string(token_data.get('expira_en'))
+        _logger.info("Token Expiry: %s", token_expiry)
+        _logger.info("Now: %s", fields.Datetime.now())
+        _logger.info("Token Expiry Now?: %s", fields.Datetime.now() <= token_expiry)
         if not token_expiry or token_expiry <= fields.Datetime.now():
+            _logger.info("Token ha expirado, regenerar")
             # Token ha expirado, regenerar
             api_url = "https://testapigt.digifact.com/api/login/get_token"
             username = f"GT.{company.vat.zfill(12)}.{company.fel_user}"
@@ -86,6 +91,7 @@ class PosOrder(models.Model):
 
         # Obtener o regenerar el token
         token = self._get_or_regenerate_token()
+        _logger.info("Token obtenido: %s", token)
 
         # Construcción del payload para la certificación en SAT
         invoice_data = {

@@ -4,7 +4,7 @@ odoo.define('digifact.force_invoice', function(require) {
     "use strict";
 
     const { patch } = require("@web/core/utils/patch");
-    const PaymentScreen = require("point_of_sale.PaymentScreen");
+    const { PaymentScreen } = require("point_of_sale/app/screens/payment_screen/payment_screen");
 
     patch(PaymentScreen.prototype, "digifact_patch_force_invoice", {
         setup() {
@@ -19,6 +19,11 @@ odoo.define('digifact.force_invoice', function(require) {
         toggleIsToInvoice() {
             console.warn("Intento de cambiar to_invoice bloqueado!");
             return; // Bloquea el botón, no permite cambios
+        },
+
+        shouldDownloadInvoice() {
+            console.warn("Descarga de factura bloqueada!");
+            return false; // Bloquea la descarga automática de facturas
         }
     });
 });

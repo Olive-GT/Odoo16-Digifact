@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <form string="POS Order">
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,paid,done,error" statusbar_colors="error:red;"/>
+                    <field name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'invoiced': 'success', 'cancel': 'danger', 'error': 'danger'}}"/>
                 </header>
                 <!-- Resto de la vista -->
             </form>

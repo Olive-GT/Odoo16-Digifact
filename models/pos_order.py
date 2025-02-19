@@ -1,6 +1,9 @@
-from odoo import models, fields, api
+import logging
 import requests
 import json
+from odoo import models, fields, api
+
+_logger = logging.getLogger(__name__)
 
 class PosOrder(models.Model):
     _inherit = 'pos.order'

@@ -29,6 +29,45 @@ class PosOrder(models.Model):
             vals['to_invoice'] = True
         return super(PosOrder, self).write(vals)
 
+    def _get_or_regenerate_token(self):
+        """
+        Verifica si el token ha expirado y lo regenera si es necesario.
+        """
+        company = self.company_id
+        token_data = json.loads(company.fel_token or '{}')
+
+        # Verificar si el token ha expirado
+        token_expiry = fields.Datetime.from_string(token_data.get('expira_en'))
+        if not token_expiry or token_expiry <= fields.Datetime.now():
+            # Token ha expirado, regenerar
+            api_url = "https://testapigt.digifact.com/api/login/get_token"
+            payload = {
+                "Username": company.fel_user,
+                "Password": company.fel_password
+            }
+            headers = {
+                "Content-Type": "application/json",
+            }
+
+            try:
+                response = requests.post(api_url, headers=headers, json=payload, timeout=10)
+                response_data = response.json()
+
+                if response.status_code == 200 and response_data.get("Token"):
+                    # Guardar el nuevo token en la compañía
+                    token_data = {
+                        "Token": response_data["Token"],
+                        "expira_en": response_data["expira_en"],
+                        "otorgado_a": response_data["otorgado_a"]
+                    }
+                    company.write({'fel_token': json.dumps(token_data)})
+                else:
+                    raise Exception(f"Error al obtener nuevo token: {response_data.get('message')}")
+            except Exception as e:
+                raise Exception(f"Error al conectar con API de token: {str(e)}")
+
+        return token_data.get('Token')
+
     def _prepare_fel_invoice_data(self):
         """
         Prepara la información necesaria para certificar la factura en la API de la SAT.
@@ -44,10 +83,14 @@ class PosOrder(models.Model):
         if not sat_user or not sat_password:
             raise ValueError("Faltan credenciales de FEL en la configuración de la empresa.")
 
+        # Obtener o regenerar el token
+        token = self._get_or_regenerate_token()
+
         # Construcción del payload para la certificación en SAT
         invoice_data = {
             "usuario": sat_user,  # Usuario de la empresa en FEL
             "clave": sat_password,  # Contraseña de la empresa en FEL
+            "token": token,  # Token de autenticación
             "nit_emisor": company.vat,  # NIT de la empresa emisora
             "nombre_emisor": company.name,  # Nombre de la empresa emisora
             "direccion_emisor": company.street,  # Dirección de la empresa emisora

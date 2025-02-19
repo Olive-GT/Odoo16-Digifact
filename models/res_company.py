@@ -5,3 +5,4 @@ class ResCompany(models.Model):
 
     fel_user = fields.Char("Usuario FEL")
     fel_password = fields.Char("Contraseña FEL")
+    fel_token = fields.Char("Token de Certificación")

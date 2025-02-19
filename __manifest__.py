@@ -8,7 +8,7 @@
     'data': [
         'views/assets.xml',
         'views/account_move_views.xml',
-        'views/res.xml',
+        'views/res_company_views.xml',
         'views/pos_order_views.xml',
         ],
     'assets': {

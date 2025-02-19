@@ -152,6 +152,9 @@ class PosOrder(models.Model):
         file_path_csv = "/opt/odoo/custom_addons/digifact/data/failed_orders.csv"
         file_path_json = "/opt/odoo/custom_addons/digifact/data/failed_orders.json"
 
+        # Crear el directorio si no existe
+        os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
+
         # Datos del pedido
         order_data = {
             "order_name": self.name,

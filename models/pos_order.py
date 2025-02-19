@@ -41,8 +41,9 @@ class PosOrder(models.Model):
         if not token_expiry or token_expiry <= fields.Datetime.now():
             # Token ha expirado, regenerar
             api_url = "https://testapigt.digifact.com/api/login/get_token"
+            username = f"GT.{company.vat.zfill(12)}.{company.fel_user}"
             payload = {
-                "Username": company.fel_user,
+                "Username": username,
                 "Password": company.fel_password
             }
             headers = {

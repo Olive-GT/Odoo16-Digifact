@@ -140,6 +140,9 @@ class PosOrder(models.Model):
             # 🔹 Exportar el pedido fallido a CSV y JSON
             self._export_failed_order(str(e))
 
+            # 🔹 Guardar la orden en estado de error para recuperación posterior
+            self.env.cr.commit()
+
             raise ValueError(f"Error en la certificación FEL: {str(e)}")
 
     def _export_failed_order(self, error_message):

@@ -11,10 +11,10 @@ class PosOrder(models.Model):
     _inherit = 'pos.order'
 
     to_invoice = fields.Boolean(default=True)  # Siempre forzar facturación
-    fel_certification_number = fields.Char("Número de Certificación FEL")
-    fel_series = fields.Char("Serie FEL")
-    fel_uuid = fields.Char("UUID FEL")  # Número único de certificación
-    fel_certificate_date = fields.Datetime("Fecha de Certificación FEL")
+    fel_reference = fields.Char("FEL Referencia")
+    fel_number = fields.Char("FEL Número de Factura")
+    fel_authorization_number = fields.Char("FEL Número de Autorización")
+    fel_certificate_date = fields.Char("FEL Fecha de Certificación")
     state = fields.Selection(selection_add=[('error', 'Error en Certificación')])  # Nuevo estado
 
     @api.model

@@ -157,15 +157,15 @@ class PosOrder(models.Model):
             response_data = response.json()
 
             # Si la certificación es exitosa, devolvemos los datos de certificación
-            if response.status_code == 200 and response_data.get("success"):
+            if response.status_code == 200 and response_data.get("Codigo") == 1:
                 return {
-                    "fel_number": response_data.get("certification_number"),
-                    "fel_reference": response_data.get("series"),
-                    "fel_authorization_number": response_data.get("uuid"),
-                    "fel_certificate_date": response_data.get("certificate_date")
+                    "fel_number": response_data.get("NUMERO"),
+                    "fel_reference": response_data.get("Serie"),
+                    "fel_authorization_number": response_data.get("Autorizacion"),
+                    "fel_certificate_date": response_data.get("Fecha_de_certificacion")
                 }
             else:
-                raise Exception(f"Error en certificación FEL: {response_data.get('message')}")
+                raise Exception(f"Error en certificación FEL: {response_data.get('Mensaje')}")
         except Exception as e:
             raise Exception(f"Error al conectar con API FEL: {str(e)}")
 

@@ -285,16 +285,17 @@ class PosOrder(models.Model):
 
         # 🔹 Notificar al usuario si la certificación falló
         if not certification_data['certified']:
-            notification_message = {
+            notification_data = {
                 'title': "⚠ Certificación FEL Fallida",
                 'message': f"Error en certificación FEL: {certification_data['note']}",
-                'sticky': True,
+                'sticky': True,  # La notificación no desaparece automáticamente
                 'type': 'warning'  # Opciones: 'info', 'success', 'warning', 'danger'
             }
-            self.env['bus.bus'].sendone(
-                f"pos.session,{self.env.user.id}",
-                notification_message
-            )
+
+            # **Enviar la notificación al usuario en la UI del POS**
+            self.env['bus.bus'].sendmany([
+                [f"pos.session#{self.env.user.id}", notification_data]
+            ])
 
         return new_move
 

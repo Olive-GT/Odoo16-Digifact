@@ -354,7 +354,7 @@ class PosOrder(models.Model):
         message = _("<p>Dear %s,<br/>Here is your electronic ticket for the %s. </p>") % (client['name'], name)
 
         invoice = self.account_move
-        invoice.send_email_to = self.partner_id.email
+        invoice.send_email_to = client['email']
 
         return {
             'subject': _('Receipt %s', name),

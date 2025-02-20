@@ -269,51 +269,16 @@ class PosOrder(models.Model):
             self.write({"state": "error"})
             self.write({"note": f"⚠ Error en certificación FEL: {str(e)}"})  # Agregar el error a las notas
 
-            # 🔹 Exportar el pedido fallido a CSV y JSON
-            self._export_failed_order(str(e))
 
             # 🔹 Guardar la orden en estado de error para recuperación posterior
             self.env.cr.commit()
 
             raise ValueError(f"Error en la certificación FEL: {str(e)}")
-
-    def _export_failed_order(self, error_message):
-        """
-        Guarda los pedidos con error en un archivo CSV y JSON.
-        """
-        file_path_csv = "/opt/odoo/custom_addons/digifact/data/failed_orders.csv"
-        file_path_json = "/opt/odoo/custom_addons/digifact/data/failed_orders.json"
-
-        # Crear el directorio si no existe
-        os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
-
-        # Datos del pedido
-        order_data = {
-            "order_name": self.name,
-            "pos_reference": self.pos_reference,
-            "customer": self.partner_id.name if self.partner_id else "Sin Cliente",
-            "amount_total": self.amount_total,
-            "error_message": error_message
-        }
-
-        # Guardar en CSV
-        file_exists = os.path.isfile(file_path_csv)
-        with open(file_path_csv, mode="a", newline="") as file:
-            writer = csv.writer(file)
-            if not file_exists:
-                writer.writerow(["Order Name", "POS Reference", "Customer", "Amount Total", "Error Message"])
-            writer.writerow(order_data.values())
-
-        # Guardar en JSON
-        try:
-            with open(file_path_json, "r") as json_file:
-                failed_orders = json.load(json_file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            failed_orders = []
-
-        failed_orders.append(order_data)
-
-        with open(file_path_json, "w") as json_file:
-            json.dump(failed_orders, json_file, indent=4)
-
-        _logger.info(f"📂 Pedido con error guardado en {file_path_csv} y {file_path_json}")
+        
+    def _create_picking(self):
+        """Evita la creación de movimientos de stock si el pedido está en estado 'error'."""
+        for order in self:
+            if order.state == 'error':
+                _logger.info(f"⛔ Pedido {order.name} en estado 'error': no se generará picking.")
+                return  # No se ejecuta la creación de stock
+        return super(PosOrder, self)._create_picking()

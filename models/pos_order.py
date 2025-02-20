@@ -1,8 +1,7 @@
 import logging
 import requests
 import json
-import csv
-import os
+import base64
 from odoo import models, fields, api, _
 
 _logger = logging.getLogger(__name__)
@@ -318,10 +317,50 @@ class PosOrder(models.Model):
 
         return new_move
 
-    def _message_post(self, **kwargs):
-        """
-        Sobrescribir para evitar agregar el PDF de la factura al correo si no está certificada.
-        """
-        if not self.certified:
-            kwargs['attachments'] = []
-        return super(PosOrder, self)._message_post(**kwargs)
+    import base64
+
+    def _add_mail_attachment(self, name, ticket):
+        filename = 'Receipt-' + name + '.jpg'
+        receipt = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'datas': ticket,
+            'res_model': 'pos.order',
+            'res_id': self.ids[0],
+            'mimetype': 'image/jpeg',
+        })
+        attachment = [(4, receipt.id)]
+
+        # Verificar si el pedido tiene una factura (account_move)
+        if self.mapped('account_move'):
+            invoice = self.account_move
+            if invoice.certified:
+                # Si la factura está certificada, se adjunta el PDF
+                report = self.env['ir.actions.report']._render_qweb_pdf("account.account_invoices", invoice.ids[0])
+                filename = name + '.pdf'
+                invoice_attachment = self.env['ir.attachment'].create({
+                    'name': filename,
+                    'type': 'binary',
+                    'datas': base64.b64encode(report[0]),
+                    'res_model': 'pos.order',
+                    'res_id': self.ids[0],
+                    'mimetype': 'application/x-pdf'
+                })
+                attachment += [(4, invoice_attachment.id)]
+
+        return attachment
+
+    def _prepare_mail_values(self, name, client, ticket):
+        message = _("<p>Dear %s,<br/>Here is your electronic ticket for the %s. </p>") % (client['name'], name)
+
+        invoice = self.account_move
+        invoice.send_email_to = self.partner_id.email
+
+        return {
+            'subject': _('Receipt %s', name),
+            'body_html': message,
+            'author_id': self.env.user.partner_id.id,
+            'email_from': self.env.company.email or self.env.user.email_formatted,
+            'email_to': client['email'],
+            'attachment_ids': self._add_mail_attachment(name, ticket),
+        }

@@ -286,15 +286,33 @@ class PosOrder(models.Model):
 
         # 🔹 Enviar correo electrónico si la certificación falló
         if not certification_data['certified']:
-            mail_template = self.env['mail.template'].search([('name', '=', 'Error en Certificación FEL')], limit=1)
-            if mail_template:
-                _logger.info(f"📩 Enviando correo con Order ID: {self.id}, Name: {self.name}, Note: {self.note}")
-                mail_template.with_context(
-                    default_model='pos.order', 
-                    default_res_id=self.id, 
-                    default_use_template=True,
-                    certification_data=certification_data
-                ).send_mail(self.id, force_send=True)
+            # 🔹 Verifica que el pedido tiene datos correctos
+            order_name = self.name or "Pedido desconocido"
+            order_note = certification_data.get("note", "No hay detalles disponibles")
+
+            # 🔹 Crea el contenido del correo
+            email_body = f"""
+                <p><strong>ERROR DE CERTIFICACIÓN</strong></p>
+                <p><strong>Pedido:</strong> {order_name}</p>
+                <p><strong>Detalles del error:</strong> {order_note}</p>
+                <p>Por favor, revise y solucione el problema.</p>
+                <p>Saludos,</p>
+                <p>El equipo de soporte</p>
+            """
+
+            # 🔹 Crea y envía el correo
+            mail_values = {
+                'subject': f"Error en Certificación FEL para la Orden {order_name}",
+                'email_from': self.env.user.email or 'noreply@tuempresa.com',
+                'email_to': 'juancarlos@olivegt.com',  # Cambia por el destinatario correcto
+                'body_html': email_body,
+                'notification': True,
+            }
+            mail = self.env['mail.mail'].create(mail_values)
+            mail.send()
+
+            _logger.info(f"📩 Correo enviado a juancarlos@olivegt.com con contenido:\n{email_body}")
+
 
         return new_move
 

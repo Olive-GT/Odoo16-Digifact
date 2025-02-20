@@ -283,20 +283,11 @@ class PosOrder(models.Model):
          # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
         new_move.tipo_gasto = "compra"
 
-        pos_session = self.env['pos.session'].search([('user_id', '=', self.env.user.id), ('state', '=', 'opened')], limit=1)
-
-        # 🔹 Notificar al usuario si la certificación falló
+        # 🔹 Enviar correo electrónico si la certificación falló
         if not certification_data['certified']:
-            notification_message = {
-                'title': "⚠ Certificación FEL Fallida",
-                'sticky': True,
-                'type': 'warning'  # Opciones: 'info', 'success', 'warning', 'danger'
-            }
-            self.env['bus.bus']._sendone(
-                f"pos.sync.{pos_session.id}",
-                notification_message,
-                f"Error en certificación FEL: {certification_data['note']}"
-            )
+            mail_template = self.env.ref('mail.template_certification_error')
+            if mail_template:
+                mail_template.with_context(certification_data=certification_data).send_mail(self.id, force_send=True)
 
         return new_move
 

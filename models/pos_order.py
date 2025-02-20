@@ -252,32 +252,22 @@ class PosOrder(models.Model):
         try:
             # 🔹 Enviar factura a la API SAT y obtener datos de certificación
             certification_data = self._certify_invoice_with_sat()
-
-            # 🔹 Llamamos a la función original de Odoo para crear la factura
-            new_move = super(PosOrder, self)._create_invoice(move_vals)
-
-            # 🔹 Guardamos los datos de certificación en la factura creada
-            new_move.write(certification_data)  # Guarda datos en `account.move`
-            self.write(certification_data)  # Guarda datos en `pos.order`
-
-            return new_move
-
         except Exception as e:
             _logger.error(f"❌ Error en la certificación FEL: {str(e)}")
+            certification_data = {
+                "fel_number": "",
+                "fel_reference": "",
+                "fel_authorization_number": "",
+                "fel_certificate_date": "",
+                "state": "error",
+                "note": f"⚠ Error en certificación FEL: {str(e)}"
+            }
 
-            # 🔹 Guardar el pedido en estado "error"
-            self.write({"state": "error"})
-            self.write({"note": f"⚠ Error en certificación FEL: {str(e)}"})  # Agregar el error a las notas
+        # 🔹 Llamamos a la función original de Odoo para crear la factura
+        new_move = super(PosOrder, self)._create_invoice(move_vals)
 
+        # 🔹 Guardamos los datos de certificación en la factura creada
+        new_move.write(certification_data)  # Guarda datos en `account.move`
+        self.write(certification_data)  # Guarda datos en `pos.order`
 
-            # 🔹 Guardar la orden en estado de error para recuperación posterior
-            self.env.cr.commit()
-
-            raise ValueError(f"Error en la certificación FEL: {str(e)}")
-        
-    def create_picking(self):
-        """Evita la creación de movimientos de stock si el pedido está en estado 'error'."""
-        orders_to_process = self.filtered(lambda order: order.state != 'error')
-        for order in self - orders_to_process:
-            _logger.info(f"⛔ Pedido {order.name} en estado 'error': no se generará picking.")
-        return super(PosOrder, orders_to_process).create_picking()
+        return new_move

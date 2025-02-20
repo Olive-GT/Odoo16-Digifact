@@ -27,7 +27,7 @@ class AccountMove(models.Model):
             return ""
 
         # Definir la URL personalizada para el QR
-        qr_url = f"https://olive.gt/factura/{self.fel_number}/{self.fel_authorization_number}"
+        qr_url = f"https://felpub.c.sat.gob.gt/verificador-web/publico/vistas/verificacionDte.jsf?tipo=autorizacion&numero={self.fel_authorization_number}&emisor={self.partner_id.vat}&receptor={self.partner_id.vat}"
 
         # Generar el código QR
         qr = qrcode.QRCode(

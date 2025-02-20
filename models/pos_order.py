@@ -277,8 +277,7 @@ class PosOrder(models.Model):
         
     def create_picking(self):
         """Evita la creación de movimientos de stock si el pedido está en estado 'error'."""
-        for order in self:
-            if order.state == 'error':
-                _logger.info(f"⛔ Pedido {order.name} en estado 'error': no se generará picking.")
-                continue  # No se ejecuta la creación de stock para este pedido
-        return super(PosOrder, self).create_picking()
+        orders_to_process = self.filtered(lambda order: order.state != 'error')
+        for order in self - orders_to_process:
+            _logger.info(f"⛔ Pedido {order.name} en estado 'error': no se generará picking.")
+        return super(PosOrder, orders_to_process).create_picking()

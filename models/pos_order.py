@@ -301,10 +301,13 @@ class PosOrder(models.Model):
             """
 
             # 🔹 Crea y envía el correo
+            # Obtener el correo electrónico del destinatario desde la configuración del sistema
+            email_to = self.env['ir.config_parameter'].sudo().get_param('fel_error_email', 'juancarlos@olivegt.com')
+
             mail_values = {
                 'subject': f"Error en Certificación FEL para la Orden {order_name}",
                 'email_from': self.env.user.email or 'noreply@tuempresa.com',
-                'email_to': 'juancarlos@olivegt.com',  # Cambia por el destinatario correcto
+                'email_to': email_to,  # Utilizar el correo configurado
                 'body_html': email_body,
             }
             mail = self.env['mail.mail'].create(mail_values)

@@ -101,14 +101,13 @@ class PosOrder(models.Model):
             "clave": sat_password,  # Contraseña de la empresa en FEL
             "token": token,  # Token de autenticación
             "moneda": "GTQ",  # Token de autenticación
-            "fecha_emision": fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "nit_emisor": company.vat,  # NIT de la empresa emisora
             "nombre_emisor": company.name,  # Nombre de la empresa emisora
             "nombre_establecimiento": "NAPARI",  # Nombre de la empresa emisora
             "direccion_emisor": company.street,  # Dirección de la empresa emisora
             "nit_receptor": self.partner_id.vat or "CF",  # NIT del cliente (CF si es consumidor final)
-            "nombre_receptor": self.partner_id.name,  # Nombre del cliente
-            "fecha_emision": fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Fecha actual
+            # Nombre del cliente
+            "fecha_emision": fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),  # Fecha actual
             "moneda": self.currency_id.name,  # Moneda de la factura
             "monto_total": self.amount_total,  # Total de la factura
             "productos": [  # Detalle de los productos vendidos

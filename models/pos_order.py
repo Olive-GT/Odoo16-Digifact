@@ -272,4 +272,13 @@ class PosOrder(models.Model):
 
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
+        # 🔹 Agregar fel_reference-fel_number al inicio de la referencia de la factura
+        if new_move.ref:
+            new_move.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']} ({new_move.ref})"
+        else:
+            new_move.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']}"
+
+        # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
+        new_move.tipo_gasto = "compra"
+
         return new_move

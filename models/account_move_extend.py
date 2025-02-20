@@ -27,7 +27,7 @@ class AccountMove(models.Model):
             return ""
 
         # Definir la URL personalizada para el QR
-        qr_url = f"https://felpub.c.sat.gob.gt/verificador-web/publico/vistas/verificacionDte.jsf?tipo=autorizacion&numero={self.fel_authorization_number}&emisor={self.partner_id.vat}&receptor={self.partner_id.vat}"
+        qr_url = f"https://felpub.c.sat.gob.gt/verificador-web/publico/vistas/verificacionDte.jsf?tipo=autorizacion&numero={self.fel_authorization_number}&emisor={self.company_id.vat}&receptor={self.partner_id.vat}"
 
         # Generar el código QR
         qr = qrcode.QRCode(

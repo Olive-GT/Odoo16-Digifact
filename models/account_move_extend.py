@@ -8,7 +8,7 @@ class AccountMove(models.Model):
 
     qr_code = fields.Binary("Código QR", compute="_compute_qr_code_fel", store=True)
     fel_reference = fields.Char("FEL Referencia")
-    note = fields.Char("Notas")
+    note = fields.Text("Notas")
     certified = fields.Boolean("Certificación")
     fel_number = fields.Char("FEL Número de Factura")
     fel_authorization_number = fields.Char("FEL Número de Autorización")

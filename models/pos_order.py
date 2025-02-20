@@ -104,6 +104,7 @@ class PosOrder(models.Model):
             "nit_emisor": company.vat,  # NIT de la empresa emisora
             "nombre_emisor": company.name,  # Nombre de la empresa emisora
             "nombre_establecimiento": "NAPARI",  # Nombre de la empresa emisora
+            "codigo_establecimiento": "1",  # Nombre de la empresa emisora
             "direccion_emisor": company.street,  # Dirección de la empresa emisora
             "nit_receptor": self.partner_id.vat or "CF",  # NIT del cliente (CF si es consumidor final)
             "nombre_receptor": self.partner_id.name, # Nombre del cliente
@@ -178,7 +179,7 @@ class PosOrder(models.Model):
             <dte:DatosEmision ID="DatosEmision">
                 <dte:DatosGenerales Tipo="FACT" FechaHoraEmision="{invoice_data['fecha_emision']}"
                     CodigoMoneda="{invoice_data['moneda']}" />
-                <dte:Emisor NITEmisor="{invoice_data['nit_emisor']}" NombreEmisor="{invoice_data['nombre_emisor']}" CodigoEstablecimiento="1"
+                <dte:Emisor NITEmisor="{invoice_data['nit_emisor']}" NombreEmisor="{invoice_data['nombre_emisor']}" CodigoEstablecimiento="{invoice_data['codigo_establecimiento']}"
                     NombreComercial="{invoice_data['nombre_establecimiento']}" AfiliacionIVA="GEN">
                     <dte:DireccionEmisor>
                         <dte:Direccion>{invoice_data['direccion_emisor']}</dte:Direccion>
@@ -213,8 +214,8 @@ class PosOrder(models.Model):
                             <dte:Impuesto>
                                 <dte:NombreCorto>IVA</dte:NombreCorto>
                                 <dte:CodigoUnidadGravable>1</dte:CodigoUnidadGravable>
-                                <dte:MontoGravable>{p['subtotal'] * 0.89}</dte:MontoGravable>
-                                <dte:MontoImpuesto>{p['subtotal'] * 0.12}</dte:MontoImpuesto>
+                                <dte:MontoGravable>{p['subtotal']/1.12}</dte:MontoGravable>
+                                <dte:MontoImpuesto>{(p['subtotal']/1.12) * 0.12}</dte:MontoImpuesto>
                             </dte:Impuesto>
                         </dte:Impuestos>
                         <dte:Total>{p['subtotal']}</dte:Total>
@@ -222,7 +223,7 @@ class PosOrder(models.Model):
                 </dte:Items>
                 <dte:Totales>
                     <dte:TotalImpuestos>
-                        <dte:TotalImpuesto NombreCorto="IVA" TotalMontoImpuesto="{sum(p['subtotal'] * 0.12 for p in invoice_data['productos'])}"/>
+                        <dte:TotalImpuesto NombreCorto="IVA" TotalMontoImpuesto="{(sum(p['subtotal'] for p in invoice_data['productos'])/1.12)*0.12}"/>
                     </dte:TotalImpuestos>
                     <dte:GranTotal>{invoice_data['monto_total']}</dte:GranTotal>
                 </dte:Totales>

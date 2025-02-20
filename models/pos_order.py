@@ -95,6 +95,9 @@ class PosOrder(models.Model):
         token = self._get_or_regenerate_token()
         _logger.info("Token obtenido: %s", token)
 
+        # Obtener datos del punto de venta
+        pos_config = self.session_id.config_id
+
         # Construcción del payload para la certificación en SAT
         invoice_data = {
             "usuario": sat_user,  # Usuario de la empresa en FEL
@@ -103,8 +106,8 @@ class PosOrder(models.Model):
             "moneda": "GTQ",  # Token de autenticación
             "nit_emisor": company.vat,  # NIT de la empresa emisora
             "nombre_emisor": company.name,  # Nombre de la empresa emisora
-            "nombre_establecimiento": "NAPARI",  # Nombre de la empresa emisora
-            "codigo_establecimiento": "1",  # Nombre de la empresa emisora
+            "nombre_establecimiento": pos_config.establishment_name or "NAPARI",  # Nombre del establecimiento
+            "codigo_establecimiento": pos_config.establishment_id or "1",  # Código del establecimiento
             "direccion_emisor": company.street,  # Dirección de la empresa emisora
             "nit_receptor": self.partner_id.vat or "CF",  # NIT del cliente (CF si es consumidor final)
             "nombre_receptor": self.partner_id.name, # Nombre del cliente

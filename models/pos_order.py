@@ -43,8 +43,8 @@ class PosOrder(models.Model):
         now = fields.Datetime.context_timestamp(self, fields.Datetime.now())
         _logger.info("Token Expiry: %s", token_expiry)
         _logger.info("Now: %s", now)
-        _logger.info("Token Expiry Now?: %s", now <= token_expiry)
-        if not token_expiry or token_expiry <= now:
+        _logger.info("Token Expiry Now?: %s", now >= token_expiry)
+        if not token_expiry or now >= token_expiry:
             _logger.info("Token ha expirado, regenerar")
             # Token ha expirado, regenerar
             api_url = "https://testapigt.digifact.com/api/login/get_token"

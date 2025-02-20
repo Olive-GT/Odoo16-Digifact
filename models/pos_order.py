@@ -291,7 +291,7 @@ class PosOrder(models.Model):
                 'sticky': True,
                 'type': 'warning'  # Opciones: 'info', 'success', 'warning', 'danger'
             }
-            self.env['bus.bus']._sendone(
+            self.env['bus.bus'].sendone(
                 f"pos.session,{self.env.user.id}",
                 notification_message
             )

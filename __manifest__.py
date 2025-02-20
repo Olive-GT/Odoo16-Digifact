@@ -11,7 +11,7 @@
         'views/res_company_views.xml',
         'views/pos_order_views.xml',
         'views/pos_config_views.xml',
-        'partner_details_edit_inherit.xml'
+        'views/partner_details_edit_inherit.xml'
         ],
     'assets': {
         'point_of_sale._assets_pos': [

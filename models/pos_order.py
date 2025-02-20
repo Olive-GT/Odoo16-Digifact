@@ -286,6 +286,7 @@ class PosOrder(models.Model):
         # 🔹 Enviar correo electrónico si la certificación falló
         if not certification_data['certified']:
             mail_template = self.env['mail.template'].search([('name', '=', 'Error en Certificación FEL')], limit=1)
+            _logger.info("Mail template: %s", mail_template)
             if mail_template:
                 mail_template.with_context(certification_data=certification_data).send_mail(self.id, force_send=True)
 

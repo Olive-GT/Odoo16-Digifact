@@ -15,6 +15,8 @@ class PosOrder(models.Model):
     fel_number = fields.Char("FEL Número de Factura")
     fel_authorization_number = fields.Char("FEL Número de Autorización")
     fel_certificate_date = fields.Char("FEL Fecha de Certificación")
+    certified = fields.Boolean("Certificado FEL", default=False)
+    note = fields.Text("Nota")
     state = fields.Selection(selection_add=[('error', 'Error en Certificación')])  # Nuevo estado
 
     @api.model
@@ -260,7 +262,6 @@ class PosOrder(models.Model):
                 "fel_reference": "",
                 "fel_authorization_number": "",
                 "fel_certificate_date": "",
-                "state": "error",
                 "note": f"⚠ Error en certificación FEL: {str(e)}",
                 "certified": False
             }

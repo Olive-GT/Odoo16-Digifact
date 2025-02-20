@@ -306,7 +306,6 @@ class PosOrder(models.Model):
                 'email_from': self.env.user.email or 'noreply@tuempresa.com',
                 'email_to': 'juancarlos@olivegt.com',  # Cambia por el destinatario correcto
                 'body_html': email_body,
-                'notification': True,
             }
             mail = self.env['mail.mail'].create(mail_values)
             mail.send()

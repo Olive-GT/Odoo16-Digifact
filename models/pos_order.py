@@ -285,7 +285,7 @@ class PosOrder(models.Model):
 
         # 🔹 Notificar al usuario si la certificación falló
         if not certification_data['certified']:
-            self.env.user.notify_warning(
+            self.env.user.notify(
                 message=f"Error en certificación FEL: {certification_data['note']}",
                 title="Certificación FEL Fallida",
                 sticky=True,

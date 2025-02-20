@@ -289,7 +289,12 @@ class PosOrder(models.Model):
             mail_template = self.env['mail.template'].search([('name', '=', 'Error en Certificación FEL')], limit=1)
             if mail_template:
                 _logger.info(f"📩 Enviando correo con Order ID: {self.id}, Name: {self.name}, Note: {self.note}")
-                mail_template.with_context(certification_data=certification_data).send_mail(self.id, force_send=True)
+                mail_template.with_context(
+                    default_model='pos.order', 
+                    default_res_id=self.id, 
+                    default_use_template=True,
+                    certification_data=certification_data
+                ).send_mail(self.id, force_send=True)
 
         return new_move
 

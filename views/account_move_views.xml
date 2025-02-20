@@ -17,6 +17,7 @@
             <xpath expr="//sheet" position="inside">
                 <group string="Notas" name="note_group" colspan="2">
                     <field name="note"/>
+                    <field name="send_email_to"/>
                 </group>
             </xpath>
         </field>

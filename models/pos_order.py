@@ -11,6 +11,7 @@ class PosOrder(models.Model):
     _inherit = 'pos.order'
 
     to_invoice = fields.Boolean(default=True)  # Siempre forzar facturación
+    certified = fields.Boolean("Certificado FEL", default=False)
     fel_reference = fields.Char("FEL Referencia")
     fel_number = fields.Char("FEL Número de Factura")
     fel_authorization_number = fields.Char("FEL Número de Autorización")
@@ -271,6 +272,4 @@ class PosOrder(models.Model):
 
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
-        self.write(certification_data)  # Guarda datos en `pos.order`
-
         return new_move

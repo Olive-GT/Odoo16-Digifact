@@ -289,6 +289,7 @@ class PosOrder(models.Model):
                 message=f"Error en certificación FEL: {certification_data['note']}",
                 title="Certificación FEL Fallida",
                 sticky=True,
+                type='warning'
             )
 
         return new_move

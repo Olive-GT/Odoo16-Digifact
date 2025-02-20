@@ -10,8 +10,14 @@
                         <field name="fel_reference"/>
                         <field name="fel_number"/>
                         <field name="fel_authorization_number"/>
+                        <field name="certified"/>
                     </group>
                 </page>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <group string="Notas" name="note_group" colspan="2">
+                    <field name="note"/>
+                </group>
             </xpath>
         </field>
     </record>

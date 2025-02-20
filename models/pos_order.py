@@ -273,7 +273,7 @@ class PosOrder(models.Model):
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
         self.write(certification_data)  # Guarda datos en `pos.order`
-        self.flush()
+        self.flush_model()  # Forzar la escritura de los datos en la base de datos
 
         # 🔹 Agregar fel_reference-fel_number al inicio de la referencia de la factura
         if new_move.ref:

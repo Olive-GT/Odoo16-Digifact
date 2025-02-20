@@ -155,7 +155,7 @@ class PosOrder(models.Model):
 
         # Definir los headers de la solicitud
         headers = {
-            "Content-Type": "application/xml",
+            "Content-Type": "application/json",
             "Authorization": invoice_data['token'],
         }
 
@@ -272,13 +272,31 @@ class PosOrder(models.Model):
 
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
+        self.write(certification_data)  # Guarda datos en `pos.order`
+
         # 🔹 Agregar fel_reference-fel_number al inicio de la referencia de la factura
         if new_move.ref:
             new_move.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']} ({new_move.ref})"
         else:
             new_move.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']}"
 
-        # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
+         # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
         new_move.tipo_gasto = "compra"
 
+        # 🔹 Notificar al usuario si la certificación falló
+        if not certification_data['certified']:
+            self.env.user.notify_warning(
+                message=f"Error en certificación FEL: {certification_data['note']}",
+                title="Certificación FEL Fallida",
+                sticky=True,
+            )
+
         return new_move
+
+    def _message_post(self, **kwargs):
+        """
+        Sobrescribir para evitar agregar el PDF de la factura al correo si no está certificada.
+        """
+        if not self.certified:
+            kwargs['attachments'] = []
+        return super(PosOrder, self)._message_post(**kwargs)

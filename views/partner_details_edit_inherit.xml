@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Heredamos la vista original de edición de partners en POS -->
+        <record id="partner_details_edit_inherit" model="ir.ui.view">
+            <field name="name">partner.details.edit.inherit</field>
+            <field name="model">ir.ui.view</field>
+            <field name="inherit_id" ref="point_of_sale.view_partner_details_edit"/>
+            <field name="arch" type="xml">
+
+                <!-- Insertamos el botón debajo del campo de VAT -->
+                <xpath expr="//input[@name='vat']" position="after">
+                    <div class="partner-detail">
+                        <button class="button vat-verify-btn" t-on-click="verifyVAT">
+                            Verificar NIF
+                        </button>
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>

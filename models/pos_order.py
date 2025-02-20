@@ -38,7 +38,7 @@ class PosOrder(models.Model):
 
         # Verificar si el token ha expirado
         _logger.info("Token data: %s", token_data)
-        token_expiry = fields.Datetime.from_string(token_data.get('expira_en'))
+        token_expiry = fields.Datetime.from_string(token_data.get('expira_en').replace('T', ' ').split('.')[0])
         _logger.info("Token Expiry: %s", token_expiry)
         _logger.info("Now: %s", fields.Datetime.now())
         _logger.info("Token Expiry Now?: %s", fields.Datetime.now() <= token_expiry)

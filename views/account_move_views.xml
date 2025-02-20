@@ -4,12 +4,14 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <group string="FEL" name="fel_group" colspan="2">
-                    <field name="fel_reference"/>
-                    <field name="fel_number"/>
-                    <field name="fel_authorization_number"/>
-                </group>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="FEL">
+                    <group string="FEL" name="fel_group" colspan="2">
+                        <field name="fel_reference"/>
+                        <field name="fel_number"/>
+                        <field name="fel_authorization_number"/>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>

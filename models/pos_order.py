@@ -165,7 +165,7 @@ class PosOrder(models.Model):
                     "fel_certificate_date": response_data.get("Fecha_de_certificacion")
                 }
             else:
-                raise Exception(f"Error en certificación FEL: {response_data.get('Mensaje')}")
+                raise Exception(f"Error en certificación FEL: {response_data.get('Mensaje')} {response_data.get('ResponseDATA1')}")
         except Exception as e:
             raise Exception(f"Error al conectar con API FEL: {str(e)}")
 

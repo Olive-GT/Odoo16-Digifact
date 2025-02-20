@@ -252,6 +252,7 @@ class PosOrder(models.Model):
         try:
             # 🔹 Enviar factura a la API SAT y obtener datos de certificación
             certification_data = self._certify_invoice_with_sat()
+            certification_data['certified'] = True
         except Exception as e:
             _logger.error(f"❌ Error en la certificación FEL: {str(e)}")
             certification_data = {
@@ -260,7 +261,8 @@ class PosOrder(models.Model):
                 "fel_authorization_number": "",
                 "fel_certificate_date": "",
                 "state": "error",
-                "note": f"⚠ Error en certificación FEL: {str(e)}"
+                "note": f"⚠ Error en certificación FEL: {str(e)}",
+                "certified": False
             }
 
         # 🔹 Llamamos a la función original de Odoo para crear la factura

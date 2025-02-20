@@ -11,6 +11,7 @@
         'views/res_company_views.xml',
         'views/pos_order_views.xml',
         'views/pos_config_views.xml',
+        'data/mail_temnplate.xml',
         ],
     'assets': {
         'point_of_sale._assets_pos': [

@@ -1,0 +1,22 @@
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_certification_error" model="mail.template">
+            <field name="name">Error en Certificación FEL</field>
+            <field name="model_id" ref="point_of_sale.model_pos_order"/>
+            <field name="subject">Error en Certificación FEL para la Orden ${object.name}</field>
+            <field name="email_from">${(object.user_id.email)|safe}</field>
+            <field name="email_to">juancarlos@olivegt.com</field>
+            <field name="body_html" type="html">
+                <![CDATA[
+                <p>Estimado/a,</p>
+                <p>Ha ocurrido un error en la certificación FEL para la orden <strong>${object.name}</strong>.</p>
+                <p>Detalles del error:</p>
+                <p>${object.note}</p>
+                <p>Por favor, revise y solucione el problema.</p>
+                <p>Saludos,</p>
+                <p>El equipo de soporte</p>
+                ]]>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -47,7 +47,10 @@ class PosOrder(models.Model):
         if not token_expiry or now >= token_expiry:
             _logger.info("Token ha expirado, regenerar")
             # Token ha expirado, regenerar
-            api_url = "https://testapigt.digifact.com/api/login/get_token"
+            api_url = self.env['ir.config_parameter'].sudo().get_param('fel_token_url')
+
+            if not api_url:
+                raise Exception("URL de API de token no configurada en parámetros del sistema.")
             username = f"GT.{company.vat.zfill(12)}.{company.fel_user}"
             payload = {
                 "Username": username,
@@ -103,7 +106,6 @@ class PosOrder(models.Model):
             "usuario": sat_user,  # Usuario de la empresa en FEL
             "clave": sat_password,  # Contraseña de la empresa en FEL
             "token": token,  # Token de autenticación
-            "moneda": "GTQ",  # Token de autenticación
             "nit_emisor": company.vat,  # NIT de la empresa emisora
             "nombre_emisor": company.name,  # Nombre de la empresa emisora
             "nombre_establecimiento": pos_config.establishment_name or "NAPARI",  # Nombre del establecimiento
@@ -140,8 +142,13 @@ class PosOrder(models.Model):
 
         _logger.info("Datos de la factura a enviar a SAT: %s", invoice_xml)
 
+        base_url = self.env['ir.config_parameter'].sudo().get_param('fel_certify_url')
+
+        if not base_url:
+            raise Exception("URL de API de certificación no configurada en parámetros del sistema.")
+
         # Definir la URL de la API de la SAT (actualízala según corresponda)
-        api_url = f"https://testapigt.digifact.com/api/FelRequestV2?NIT={invoice_data['nit_emisor']}&TIPO=CERTIFICATE_DTE_XML_TOSIGN&FORMAT=XML&USERNAME={invoice_data['usuario']}"
+        api_url = f"{base_url}?NIT={invoice_data['nit_emisor']}&TIPO=CERTIFICATE_DTE_XML_TOSIGN&FORMAT=XML&USERNAME={invoice_data['usuario']}"
 
         # Definir los headers de la solicitud
         headers = {
@@ -153,7 +160,7 @@ class PosOrder(models.Model):
 
         try:
             # Enviar la solicitud POST a la API de la SAT
-            response = requests.post(api_url, headers=headers, data=invoice_xml, timeout=10)
+            response = requests.post(api_url, headers=headers, data=invoice_xml, timeout=60)
             response_data = response.json()
 
             # Si la certificación es exitosa, devolvemos los datos de certificación

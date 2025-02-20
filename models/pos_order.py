@@ -275,10 +275,10 @@ class PosOrder(models.Model):
 
             raise ValueError(f"Error en la certificación FEL: {str(e)}")
         
-    def _create_picking(self):
+    def create_picking(self):
         """Evita la creación de movimientos de stock si el pedido está en estado 'error'."""
         for order in self:
             if order.state == 'error':
                 _logger.info(f"⛔ Pedido {order.name} en estado 'error': no se generará picking.")
-                return  # No se ejecuta la creación de stock
-        return super(PosOrder, self)._create_picking()
+                continue  # No se ejecuta la creación de stock para este pedido
+        return super(PosOrder, self).create_picking()

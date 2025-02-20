@@ -106,8 +106,8 @@ class PosOrder(models.Model):
             "nombre_establecimiento": "NAPARI",  # Nombre de la empresa emisora
             "direccion_emisor": company.street,  # Dirección de la empresa emisora
             "nit_receptor": self.partner_id.vat or "CF",  # NIT del cliente (CF si es consumidor final)
-            "nombre_receptor": self.partner_id.name,  # Nombre del cliente
-            "fecha_emision": fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Fecha actual
+            "nombre_receptor": self.partner_id.name, # Nombre del cliente
+            "fecha_emision": fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),  # Fecha actual
             "moneda": self.currency_id.name,  # Moneda de la factura
             "monto_total": self.amount_total,  # Total de la factura
             "productos": [  # Detalle de los productos vendidos

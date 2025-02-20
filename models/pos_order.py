@@ -273,6 +273,7 @@ class PosOrder(models.Model):
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
         self.write(certification_data)  # Guarda datos en `pos.order`
+        self.flush()
 
         # 🔹 Agregar fel_reference-fel_number al inicio de la referencia de la factura
         if new_move.ref:
@@ -286,9 +287,9 @@ class PosOrder(models.Model):
         # 🔹 Enviar correo electrónico si la certificación falló
         if not certification_data['certified']:
             mail_template = self.env['mail.template'].search([('name', '=', 'Error en Certificación FEL')], limit=1)
-            _logger.info("Mail template: %s", mail_template)
             if mail_template:
-                mail_template.with_context(certification_data=certification_data, order=self).send_mail(self.ensure_one().id, force_send=True)
+                _logger.info(f"📩 Enviando correo con Order ID: {self.id}, Name: {self.name}, Note: {self.note}")
+                mail_template.with_context(certification_data=certification_data).send_mail(self.id, force_send=True)
 
         return new_move
 

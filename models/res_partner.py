@@ -81,6 +81,9 @@ class ResPartner(models.Model):
             "DATA2": f"NIT|{vat}",
             "USERNAME": username
         }
+
+        _logger.info("Request %s", params)
+        
         headers = {
             "Authorization": token,
             "Content-Type": "application/json"

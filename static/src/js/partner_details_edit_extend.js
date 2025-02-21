@@ -22,7 +22,7 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                 return;
             }
 
-            this.showLoading();
+            this.env.services.ui.unblock();
 
             try {
                 const session = this.env.pos ? this.env.pos.config : null;
@@ -34,7 +34,7 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                     args: [vatNumber, company_id],
                 });
 
-                this.hideLoading();
+                this.env.services.ui.unblock();
 
                 if (result.valid) {
                     console.warn("✅ NIT válido, actualizando datos del cliente...");
@@ -52,7 +52,7 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                     });
                 }
             } catch (error) {
-                this.hideLoading();
+                this.env.services.ui.unblock();
                 
                 console.error("❌ Error al verificar el NIT:", error);
                 this.showPopup("ErrorPopup", {

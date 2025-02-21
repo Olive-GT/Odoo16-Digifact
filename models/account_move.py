@@ -5,7 +5,7 @@ import logging
 import requests
 from io import BytesIO
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, AccessError
 
 
 _logger = logging.getLogger(__name__)
@@ -271,6 +271,19 @@ class AccountMove(models.Model):
 
     def action_certify_again(self):
         """ Intenta certificar la factura nuevamente si la certificación falló. """
+
+         # 🔹 Verificar que el usuario tiene permisos de Administrador de Contabilidad
+        if not self.env.user.has_group('account.group_account_manager'):
+            raise AccessError(_("No tienes permisos para certificar facturas."))
+
+        # 🔹 Obtener lista de empresas permitidas desde la configuración
+        allowed_companies_str = self.env['ir.config_parameter'].sudo().get_param('certify_allowed_companies', '')
+        allowed_companies = list(map(int, allowed_companies_str.split(','))) if allowed_companies_str else []
+
+        # 🔹 Verificar si la empresa actual está en la lista de permitidas
+        if self.company_id.id not in allowed_companies:
+            raise AccessError(_("No tienes permiso para certificar facturas en esta empresa."))
+
         for record in self:
             if record.certified:
                 raise UserError(_("Esta factura ya está certificada."))

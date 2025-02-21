@@ -2,13 +2,24 @@
 <templates id="template" xml:space="preserve">
     <t t-name="PartnerDetailsEdit" owl="1">
         <section class="partner-details edit">
-            <div class="form-group">
-                <label for="name">Nombre</label>
-                <input class="detail" id="name" name="name" t-model="changes.name" placeholder="Nombre" t-on-change="captureChange" />
+            <!-- Contenedor de Nombre y NIT en una sola línea -->
+            <div class="row">
+                <div class="form-group half-width">
+                    <label for="name">Nombre</label>
+                    <input class="detail" id="name" name="name" t-model="changes.name" placeholder="Nombre" t-on-change="captureChange" />
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="vat">NIT</label>
+                    <input class="detail vat" id="vat" name="vat" t-model="changes.vat" t-on-change="captureChange" />
+                    <button class="button vat-verify-btn" t-on-click="verifyVAT">
+                        Verificar NIT
+                    </button>
+                </div>
             </div>
 
+            <!-- Dirección y Correo Electrónico alineados correctamente -->
             <div class="partner-details-container">
-                <!-- Columna izquierda -->
                 <div class="partner-details-column">
                     <div class="form-group">
                         <label for="street">Dirección</label>
@@ -16,22 +27,10 @@
                     </div>
                 </div>
 
-                <!-- Columna derecha -->
                 <div class="partner-details-column">
                     <div class="form-group">
                         <label for="email">Correo electrónico</label>
                         <input class="detail" id="email" name="email" type="email" t-model="changes.email" t-on-change="captureChange" />
-                    </div>
-
-                    <!-- Agrupando el campo NIT y el botón -->
-                    <div class="form-group nit-container">
-                        <div class="nit-input">
-                            <label for="vat">NIT</label>
-                            <input class="detail vat" id="vat" name="vat" t-model="changes.vat" t-on-change="captureChange" />
-                        </div>
-                        <button class="button vat-verify-btn" t-on-click="verifyVAT">
-                            Verificar NIT
-                        </button>
                     </div>
                 </div>
             </div>

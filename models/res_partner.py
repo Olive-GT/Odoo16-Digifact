@@ -11,7 +11,7 @@ class ResPartner(models.Model):
 
     def _get_or_regenerate_token(self):
         """Verifica si el token ha expirado y lo regenera si es necesario."""
-        company = company = self.env.company
+        company = self.env['res.company']._company_default_get('res.partner')
         token_data = json.loads(company.fel_token or '{}')
 
         token_expiry = token_data.get('expira_en')
@@ -71,7 +71,7 @@ class ResPartner(models.Model):
             raise Exception("❌ URL de API de validación de NIT no configurada en parámetros del sistema.")
 
         # Obtener datos de la compañía
-        company = company = self.env.company
+        company = self.env['res.company']._company_default_get('res.partner')
         username = company.fel_user
 
         # Construir parámetros de consulta

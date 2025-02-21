@@ -6,11 +6,11 @@
             <div class="partner-details-box clearfix">
                 <div class="partner-details-left">
                     <div class="partner-detail">
-                        <span class="label">Street</span>
+                        <span class="label">Dirección</span>
                         <input class="detail" name="street"
                                t-model="changes.street"
                                t-on-change="captureChange"
-                               placeholder="Street" />
+                               placeholder="Dirección" />
                     </div>
                 </div>
                 <div class="partner-details-right">
@@ -28,18 +28,6 @@
                         <button class="button vat-verify-btn" t-on-click="verifyVAT">
                             Verificar NIT
                         </button>
-                    </div>
-
-                    <div t-if="env.pos.pricelists.length gt 1" class="partner-detail">
-                        <span class="label">Pricelist</span>
-                        <select class="detail" name="property_product_pricelist" t-on-change="captureChange" t-model="changes.property_product_pricelist">
-                            <t t-foreach="env.pos.pricelists" t-as="pricelist"
-                               t-key="pricelist.id">
-                                <option t-att-value="pricelist.id">
-                                    <t t-esc="pricelist.display_name" />
-                                </option>
-                            </t>
-                        </select>
                     </div>
                 </div>
             </div>

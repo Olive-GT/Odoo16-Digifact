@@ -3,52 +3,52 @@
 odoo.define("digifact.partner_vat_verification", function (require) {
     "use strict";
 
-    if (odoo.__loaded_partner_vat_verification__) {
-        return;
-    }
-    odoo.__loaded_partner_vat_verification__ = true;
-
     const { patch } = require("@web/core/utils/patch");
     const PartnerDetailsEdit = require("point_of_sale.PartnerDetailsEdit");
+    const rpc = require("web.rpc");
 
     patch(PartnerDetailsEdit.prototype, "digifact_patch_partner_vat", {
-        setup() {
-            this._super.apply(this, arguments);
-            console.warn("✅ Extensión de PartnerDetailsEdit cargada correctamente.");
-        },
-
         async verifyVAT() {
-            console.warn("🔍 Ejecutando verificación de VAT...");
+            console.warn("🔍 Ejecutando verificación de NIT...");
 
             const vatNumber = this.changes.vat || this.props.partner.vat;
-            if (!vatNumber) {
+
+            // 📌 Verificar si el usuario ingresó un NIT válido
+            if (!vatNumber || vatNumber.trim() === "") {
                 this.showPopup("ErrorPopup", {
                     title: "Error",
-                    body: "Por favor, ingrese un NIF antes de verificar.",
+                    body: "Por favor, ingrese un NIT antes de verificar.",
                 });
                 return;
             }
 
             try {
-                const result = await this.rpc("/pos/vat/verify", { vat: vatNumber });
+                const result = await rpc.query({
+                    model: "res.partner",
+                    method: "verify_nit",
+                    args: [vatNumber],
+                });
 
                 if (result.valid) {
+                    console.warn("✅ NIT válido, actualizando datos del cliente...");
+
+                    // 📌 Rellenar automáticamente los datos en la UI
                     this.changes.name = result.company_name || this.changes.name;
                     this.changes.street = result.address || this.changes.street;
-                    this.changes.city = result.city || this.changes.city;
-                    this.changes.country_id = result.country_id || this.changes.country_id;
-
+                    
+                    // 📌 Forzar actualización de la UI
                     this.render(true);
                 } else {
                     this.showPopup("ErrorPopup", {
-                        title: "VAT Inválido",
-                        body: "El NIF ingresado no es válido.",
+                        title: "Error en la verificación",
+                        body: result.error || "NIT inválido.",
                     });
                 }
             } catch (error) {
+                console.error("❌ Error al verificar el NIT:", error);
                 this.showPopup("ErrorPopup", {
                     title: "Error de Conexión",
-                    body: "No se pudo verificar el NIF. Intente más tarde.",
+                    body: "No se pudo verificar el NIT. Intente más tarde.",
                 });
             }
         }

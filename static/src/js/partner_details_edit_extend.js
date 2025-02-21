@@ -22,16 +22,25 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                 return;
             }
 
-            try {
+            // 📌 Mostrar popup de carga
+            this.showPopup("ConfirmPopup", {
+                title: "Verificando NIT...",
+                body: "Por favor, espere mientras verificamos el NIT.",
+                disableCancelButton: true,  // No permitir cancelar
+            });
 
+            try {
                 const session = this.env.pos ? this.env.pos.config : null;
-                const company_id = session ? session.company_id[0] : this.env.company.id; // Obtener ID de la compañía en la sesión del POS
+                const company_id = session ? session.company_id[0] : this.env.company.id;
 
                 const result = await rpc.query({
                     model: "res.partner",
                     method: "verify_nit",
                     args: [vatNumber, company_id],
                 });
+
+                // 🔹 Cerrar popup de carga
+                this.closePopup();
 
                 if (result.valid) {
                     console.warn("✅ NIT válido, actualizando datos del cliente...");
@@ -49,6 +58,9 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                     });
                 }
             } catch (error) {
+                // 🔹 Cerrar popup de carga en caso de error
+                this.closePopup();
+                
                 console.error("❌ Error al verificar el NIT:", error);
                 this.showPopup("ErrorPopup", {
                     title: "Error de Conexión",

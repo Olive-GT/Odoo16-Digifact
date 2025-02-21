@@ -39,11 +39,13 @@ class PosOrder(models.Model):
 
         # 🔹 Llamamos a la función original de Odoo para crear la factura
         new_move = super(PosOrder, self)._create_invoice(move_vals)
+        new_move.pos_config_id = self.session_id.config_id.id
 
 
         try:
             # 🔹 Enviar factura a la API SAT y obtener datos de certificación
-            certification_data = new_move._certify_invoice_with_sat()
+            pos_config = self.session_id.config_id
+            certification_data = new_move._certify_invoice_with_sat(pos_config)
             certification_data['certified'] = True
         except Exception as e:
             _logger.error(f"❌ Error en la certificación FEL: {str(e)}")

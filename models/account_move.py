@@ -19,6 +19,7 @@ class AccountMove(models.Model):
     fel_number = fields.Char("FEL Número de Factura")
     fel_authorization_number = fields.Char("FEL Número de Autorización")
     fel_certificate_date = fields.Char("FEL Fecha de Certificación")
+    pos_config_id = fields.Char("Sesión que Creó la Factura")
 
     @api.depends("fel_number", "fel_authorization_number")  
     def _compute_qr_code_fel(self):
@@ -103,7 +104,7 @@ class AccountMove(models.Model):
 
         return token_data.get('Token')
 
-    def _prepare_fel_invoice_data(self):
+    def _prepare_fel_invoice_data(self, pos_config):
         """
         Prepara la información necesaria para certificar la factura en la API de la SAT.
         """
@@ -121,9 +122,6 @@ class AccountMove(models.Model):
         # Obtener o regenerar el token
         token = self._get_or_regenerate_token()
         _logger.info("Token obtenido: %s", token)
-
-        # Obtener datos del punto de venta
-        pos_config = self.session_id.config_id
 
         # Construcción del payload para la certificación en SAT
         invoice_data = {
@@ -152,12 +150,20 @@ class AccountMove(models.Model):
 
         return invoice_data
 
-    def _certify_invoice_with_sat(self):
+    def _certify_invoice_with_sat(self, pos_config = None):
         """
         Envía la información de la factura a la API de la SAT y devuelve la respuesta con los datos de certificación.
         """
+
+        if not pos_config:
+            if not self.pos_config_id:
+                raise Exception("La factura no está asociada a un punto de venta.")
+            pos_config = self.env['pos.config'].browse(self.pos_config_id)
+            if not pos_config:
+                raise Exception("No se pudo encontrar la configuración del punto de venta asociada.")
+
         # Preparamos los datos de la factura
-        invoice_data = self._prepare_fel_invoice_data()
+        invoice_data = self._prepare_fel_invoice_data(pos_config)
 
         # Generar el XML de la factura
         invoice_xml = self._generate_invoice_xml(invoice_data)

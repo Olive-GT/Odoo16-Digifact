@@ -2,36 +2,32 @@
 <templates id="template" xml:space="preserve">
     <t t-name="PartnerDetailsEdit" owl="1">
         <section class="partner-details edit">
-            <input class="detail partner-name" name="name" t-model="changes.name" placeholder="Nombre" t-on-change="captureChange" />
-            
+            <div class="form-group">
+                <label for="name">Nombre</label>
+                <input class="detail" id="name" name="name" t-model="changes.name" placeholder="Nombre" t-on-change="captureChange" />
+            </div>
+
             <div class="partner-details-container">
                 <!-- Columna izquierda -->
                 <div class="partner-details-column">
-                    <div class="partner-detail">
-                        <span class="label">Dirección</span>
-                        <input class="detail" name="street"
-                               t-model="changes.street"
-                               t-on-change="captureChange"
-                               placeholder="Dirección" />
+                    <div class="form-group">
+                        <label for="street">Dirección</label>
+                        <input class="detail" id="street" name="street" t-model="changes.street" t-on-change="captureChange" placeholder="Dirección" />
                     </div>
                 </div>
 
                 <!-- Columna derecha -->
                 <div class="partner-details-column">
-                    <div class="partner-detail">
-                        <span class="label">Email</span>
-                        <input class="detail" name="email" type="email" 
-                               t-model="changes.email" 
-                               t-on-change="captureChange" />
+                    <div class="form-group">
+                        <label for="email">Correo electrónico</label>
+                        <input class="detail" id="email" name="email" type="email" t-model="changes.email" t-on-change="captureChange" />
                     </div>
 
-                    <!-- Agrupando el campo NIT y el botón en la misma fila -->
-                    <div class="partner-detail nit-container">
+                    <!-- Agrupando el campo NIT y el botón -->
+                    <div class="form-group nit-container">
                         <div class="nit-input">
-                            <span class="label">NIT</span>
-                            <input class="detail vat" name="vat"
-                                   t-model="changes.vat"
-                                   t-on-change="captureChange" />
+                            <label for="vat">NIT</label>
+                            <input class="detail vat" id="vat" name="vat" t-model="changes.vat" t-on-change="captureChange" />
                         </div>
                         <button class="button vat-verify-btn" t-on-click="verifyVAT">
                             Verificar NIT

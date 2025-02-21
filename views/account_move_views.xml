@@ -4,6 +4,8 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
+
+            <!-- Agregar pestaña "FEL" con sus campos -->
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="FEL">
                     <group string="FEL" name="fel_group" colspan="2">
@@ -14,12 +16,24 @@
                     </group>
                 </page>
             </xpath>
+
+            <!-- Agregar grupo de Notas -->
             <xpath expr="//sheet" position="inside">
                 <group string="Notas" name="note_group" colspan="2">
                     <field name="note"/>
                     <field name="send_email_to"/>
                 </group>
             </xpath>
+
+            <!-- Agregar el botón "Certificar de Nuevo" en la barra superior -->
+            <xpath expr="//header" position="inside">
+                <button name="action_certify_again"
+                        string="Certificar de Nuevo"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('certified', '=', True)]}" />
+            </xpath>
+
         </field>
     </record>
 </odoo>

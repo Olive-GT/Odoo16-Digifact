@@ -17,7 +17,7 @@
         'point_of_sale._assets_pos': [
             'digifact/static/src/js/force_invoice.js',
             'digifact/static/src/css/hide_invoice.css',
-            'custom_module/static/src/xml/partner_details_edit_extend.xml',
+            'digifact/static/src/xml/partner_details_edit_extend.xml',
         ],
     },
     'installable': True,

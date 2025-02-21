@@ -22,7 +22,7 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                 return;
             }
 
-            this.env.services.ui.unblock();
+            this.env.services.ui.block();
 
             try {
                 const session = this.env.pos ? this.env.pos.config : null;

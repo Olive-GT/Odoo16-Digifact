@@ -40,7 +40,7 @@ odoo.define("digifact.partner_vat_verification", function (require) {
                 });
 
                 // 🔹 Cerrar popup de carga
-                this.closePopup();
+                this.trigger('close-popup')
 
                 if (result.valid) {
                     console.warn("✅ NIT válido, actualizando datos del cliente...");

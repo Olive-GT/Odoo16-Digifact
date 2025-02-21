@@ -47,8 +47,6 @@
 .vat-verify-btn {
     margin-top: 10px;
     padding: 10px 15px;
-    background-color: #28a745;  /* Color verde similar al botón Guardar */
-    color: white;
     font-size: 16px;
     font-weight: bold;
     border: none;
@@ -58,5 +56,6 @@
 }
 
 .vat-verify-btn:hover {
-    background-color: #218838;
+    background-color: #017d83;
+    color: white;
 }

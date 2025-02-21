@@ -299,6 +299,12 @@ class AccountMove(models.Model):
                 else:
                     record.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']}"
 
+                # 🔹 Actualizar la nota y la fecha de la factura
+                record.write({
+                    'note': "Certificado exitosamente de Nuevo desde panel de facturas de venta en odoo",
+                    'invoice_date': fields.Datetime.now()
+                })
+
                 record.message_post(body="✅ La factura ha sido certificada nuevamente con éxito.")
                 _logger.info(f"✅ Factura {record.name} certificada correctamente.")
 

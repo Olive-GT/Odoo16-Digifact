@@ -1,30 +1,51 @@
 /** @odoo-module **/
 
-odoo.define('digifact.force_invoice', function(require) {
+odoo.define("digifact.partner_vat_verification", function (require) {
     "use strict";
 
     const { patch } = require("@web/core/utils/patch");
-    const PaymentScreen = require("point_of_sale.PaymentScreen");
+    const PartnerDetailsEdit = require("point_of_sale.PartnerDetailsEdit");
 
-    patch(PaymentScreen.prototype, "digifact_patch_force_invoice", {
+    patch(PartnerDetailsEdit.prototype, "digifact_patch_partner_vat", {
         setup() {
             this._super.apply(this, arguments);
-            console.warn("Forzando to_invoice=True en todas las órdenes.");
-            const order = this.env.pos.get_order();
-            if (order) {
-                order.set_to_invoice(true);
-                this.render(true); // 👈 FORZAR ACTUALIZACIÓN DE LA UI
+            console.warn("Extensión de PartnerDetailsEdit cargada correctamente.");
+        },
+
+        async verifyVAT() {
+            console.warn("Ejecutando verificación de VAT...");
+
+            const vatNumber = this.changes.vat || this.props.partner.vat;
+            if (!vatNumber) {
+                this.showPopup("ErrorPopup", {
+                    title: "Error",
+                    body: "Por favor, ingrese un NIF antes de verificar.",
+                });
+                return;
             }
-        },
 
-        toggleIsToInvoice() {
-            console.warn("Intento de cambiar to_invoice bloqueado!");
-            return; // Bloquea el botón, no permite cambios
-        },
+            try {
+                const result = await this.rpc("/pos/vat/verify", { vat: vatNumber });
 
-        shouldDownloadInvoice() {
-            console.warn("Descarga de factura bloqueada!");
-            return false; // Bloquea la descarga automática de facturas
+                if (result.valid) {
+                    this.changes.name = result.company_name || this.changes.name;
+                    this.changes.street = result.address || this.changes.street;
+                    this.changes.city = result.city || this.changes.city;
+                    this.changes.country_id = result.country_id || this.changes.country_id;
+
+                    this.render(true);
+                } else {
+                    this.showPopup("ErrorPopup", {
+                        title: "VAT Inválido",
+                        body: "El NIF ingresado no es válido.",
+                    });
+                }
+            } catch (error) {
+                this.showPopup("ErrorPopup", {
+                    title: "Error de Conexión",
+                    body: "No se pudo verificar el NIF. Intente más tarde.",
+                });
+            }
         }
     });
 });

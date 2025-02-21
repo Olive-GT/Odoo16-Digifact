@@ -18,8 +18,8 @@
             'digifact/static/src/css/hide_invoice.css',
         ],
         'point_of_sale.assets': [
-            'digifact/static/src/xml/partner_details_edit_extend.xml',
-            'digifact/static/src/js/partner_details_edit_extend.js',
+            'digifact/static/src/xml/partner_details_edit.xml',
+            #'digifact/static/src/js/partner_details_edit_extend.js',
         ],
     },
     'installable': True,

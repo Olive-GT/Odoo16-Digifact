@@ -11,7 +11,8 @@ class ResPartner(models.Model):
 
     def _get_or_regenerate_token(self):
         """Verifica si el token ha expirado y lo regenera si es necesario."""
-        company = self.env['res.company'].browse(self.env.context.get('allowed_company_ids', [self.env.company.id])[0])
+        pos_session = self.env['pos.session'].search([('user_id', '=', self.env.uid)], limit=1)
+        company = pos_session.company_id if pos_session else self.env.company
         token_data = json.loads(company.fel_token or '{}')
 
         token_expiry = token_data.get('expira_en')
@@ -71,7 +72,10 @@ class ResPartner(models.Model):
             raise Exception("❌ URL de API de validación de NIT no configurada en parámetros del sistema.")
 
         # Obtener datos de la compañía
-        company = self.env['res.company'].browse(self.env.context.get('allowed_company_ids', [self.env.company.id])[0])
+        pos_session = self.env['pos.session'].search([('user_id', '=', self.env.uid)], limit=1)
+        company = pos_session.company_id if pos_session else self.env.company
+
+
         username = company.fel_user
 
         # Construir parámetros de consulta

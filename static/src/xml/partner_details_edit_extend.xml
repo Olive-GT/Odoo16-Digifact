@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<templates id="custom_partner_details_edit_extension" xml:space="preserve">
+<templates id="template" xml:space="preserve">
     <t t-extend="PartnerDetailsEdit">
         <t t-jquery="input[name='vat']" t-operation="after">
             <div class="partner-detail">

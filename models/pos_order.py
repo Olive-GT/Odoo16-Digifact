@@ -41,6 +41,13 @@ class PosOrder(models.Model):
         new_move = super(PosOrder, self)._create_invoice(move_vals)
         new_move.pos_config_id = self.session_id.config_id.id
 
+        # 🔹 Obtener la lista de compañías permitidas para certificar
+        allowed_companies_str = self.env['ir.config_parameter'].sudo().get_param('certify_allowed_companies', '')
+        allowed_companies = [int(company_id) for company_id in allowed_companies_str.split(',') if company_id]
+
+        if self.company_id.id not in allowed_companies:
+            _logger.info(f"🔒 La compañía {self.company_id.name} no está permitida para certificar facturas.")
+            return new_move
 
         try:
             # 🔹 Enviar factura a la API SAT y obtener datos de certificación
@@ -58,7 +65,6 @@ class PosOrder(models.Model):
                 "certified": False
             }
 
-
         # 🔹 Guardamos los datos de certificación en la factura creada
         new_move.write(certification_data)  # Guarda datos en `account.move`
         self.write(certification_data)  # Guarda datos en `pos.order`
@@ -70,7 +76,7 @@ class PosOrder(models.Model):
         else:
             new_move.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']}"
 
-         # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
+        # 🔹 Establecer el campo tipo_gasto de la factura a "compra"
         new_move.tipo_gasto = "compra"
 
         # 🔹 Enviar correo electrónico si la certificación falló
@@ -103,7 +109,6 @@ class PosOrder(models.Model):
             mail.send()
 
             _logger.info(f"📩 Correo enviado a juancarlos@olivegt.com con contenido:\n{email_body}")
-
 
         return new_move
 

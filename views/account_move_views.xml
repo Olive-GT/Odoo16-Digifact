@@ -13,6 +13,12 @@
                         <field name="fel_number"/>
                         <field name="fel_authorization_number"/>
                         <field name="certified"/>
+                        <!-- Mover el botón "Certificar de Nuevo" al final del grupo FEL -->
+                        <button name="action_certify_again"
+                                string="Certificar de Nuevo"
+                                type="object"
+                                class="oe_highlight"
+                                attrs="{'invisible': [('certified', '=', True)]}" />
                     </group>
                 </page>
             </xpath>
@@ -23,15 +29,6 @@
                     <field name="note"/>
                     <field name="send_email_to"/>
                 </group>
-            </xpath>
-
-            <!-- Agregar el botón "Certificar de Nuevo" en la barra superior -->
-            <xpath expr="//header" position="inside">
-                <button name="action_certify_again"
-                        string="Certificar de Nuevo"
-                        type="object"
-                        class="oe_highlight"
-                        attrs="{'invisible': [('certified', '=', True)]}" />
             </xpath>
 
         </field>

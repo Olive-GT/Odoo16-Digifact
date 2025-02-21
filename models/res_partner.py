@@ -9,10 +9,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    def _get_or_regenerate_token(self):
+    def _get_or_regenerate_token(self, company):
         """Verifica si el token ha expirado y lo regenera si es necesario."""
-        pos_session = self.env['pos.session'].search([('user_id', '=', self.env.uid)], limit=1)
-        company = pos_session.company_id if pos_session else self.env.company
         token_data = json.loads(company.fel_token or '{}')
 
         token_expiry = token_data.get('expira_en')
@@ -59,12 +57,21 @@ class ResPartner(models.Model):
             raise Exception(f"Error al conectar con API de token: {str(e)}")
 
     @api.model
-    def verify_nit(self, vat):
-        """Verifica un NIT usando el API de Digifact."""
+    def verify_nit(self, vat, company_id=None):
+        """Verifica un NIT usando el API de Digifact con la compañía correcta."""
+        
+        # 🔹 Si se proporciona un company_id, lo usamos; si no, usamos la compañía en la sesión.
+        company = self.env['res.company'].browse(company_id)
 
-        # Obtener o regenerar el token
-        token = self._get_or_regenerate_token()
-        _logger.info("🔑 Token obtenido correctamente.")
+        if not company:
+            pos_session = self.env['pos.session'].search([('user_id', '=', self.env.uid)], limit=1)
+            company = pos_session.company_id if pos_session else self.env.company
+
+        
+        # Obtener o regenerar el token con la compañía correcta
+        token = self._get_or_regenerate_token(company)
+
+        _logger.info("🔑 Token obtenido correctamente para la compañía: %s", company.name)
 
         # Obtener URL del API desde los parámetros del sistema
         api_url = self.env['ir.config_parameter'].sudo().get_param('fel_nit_validation_url')
@@ -72,10 +79,6 @@ class ResPartner(models.Model):
             raise Exception("❌ URL de API de validación de NIT no configurada en parámetros del sistema.")
 
         # Obtener datos de la compañía
-        pos_session = self.env['pos.session'].search([('user_id', '=', self.env.uid)], limit=1)
-        company = pos_session.company_id if pos_session else self.env.company
-
-
         username = company.fel_user
 
         # Construir parámetros de consulta
@@ -99,14 +102,12 @@ class ResPartner(models.Model):
             data = response.json()
             _logger.info("📩 Respuesta del API: %s", json.dumps(data, indent=2))
 
-            # Manejar respuesta negativa
             if "Message" in data:
                 return {"valid": False, "error": data["Message"]}
 
             if "REQUEST" in data and data["REQUEST"][0]["Respuesta"] == 0:
                 return {"valid": False, "error": data["REQUEST"][0]["Mensaje"]}
 
-            # Extraer información si el NIT es válido
             if "RESPONSE" in data and data["RESPONSE"][0]["NIT"]:
                 return {
                     "valid": True,

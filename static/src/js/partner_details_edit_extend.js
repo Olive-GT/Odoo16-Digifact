@@ -23,10 +23,14 @@ odoo.define("digifact.partner_vat_verification", function (require) {
             }
 
             try {
+
+                const session = this.env.pos ? this.env.pos.config : null;
+                const company_id = session ? session.company_id[0] : this.env.company.id; // Obtener ID de la compañía en la sesión del POS
+
                 const result = await rpc.query({
                     model: "res.partner",
                     method: "verify_nit",
-                    args: [vatNumber],
+                    args: [vatNumber, company_id],
                 });
 
                 if (result.valid) {

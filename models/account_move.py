@@ -141,10 +141,10 @@ class AccountMove(models.Model):
             "productos": [  # Detalle de los productos vendidos
                 {
                     "descripcion": line.product_id.name,
-                    "cantidad": line.qty,
+                    "cantidad": line.quantity,
                     "precio_unitario": line.price_unit,
                     "subtotal": line.price_subtotal,
-                } for line in self.lines
+                } for line in self.invoice_line_ids
             ],
         }
 

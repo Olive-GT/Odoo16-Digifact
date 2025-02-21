@@ -5,6 +5,8 @@ import logging
 import requests
 from io import BytesIO
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -156,11 +158,7 @@ class AccountMove(models.Model):
         """
 
         if not pos_config:
-            if not self.pos_config_id:
-                raise Exception("La factura no está asociada a un punto de venta.")
-            pos_config = self.env['pos.config'].browse(self.pos_config_id)
-            if not pos_config:
-                raise Exception("No se pudo encontrar la configuración del punto de venta asociada.")
+            raise Exception("No se pudo encontrar la configuración del punto de venta asociada.")
 
         # Preparamos los datos de la factura
         invoice_data = self._prepare_fel_invoice_data(pos_config)
@@ -271,23 +269,87 @@ class AccountMove(models.Model):
     </dte:GTDocumento>"""
         return invoice_xml.strip()
 
-    
     def action_certify_again(self):
-        """ Método para volver a certificar la factura si falló la certificación inicial """
+        """ Intenta certificar la factura nuevamente si la certificación falló. """
         for record in self:
+            if record.certified:
+                raise UserError(_("Esta factura ya está certificada."))
+
             try:
-                # Simulación de certificación (reemplazar con API real si es necesario)
-                certification_status = self._send_certification_request()
+                _logger.info(f"🔄 Intentando certificar de nuevo la factura {record.name}...")
+                
+                # Obtener configuración de POS si está ligada a un pedido de venta
+                pos_order = self.env['pos.order'].search([('account_move', '=', record.id)], limit=1)
+                if not pos_order:
+                    raise UserError(_("No se encontró una orden de POS relacionada con esta factura."))
 
-                if certification_status:
-                    record.certified = True
-                    record.message_post(body="La factura ha sido certificada nuevamente con éxito.")
+                pos_config = pos_order.session_id.config_id
+
+                # 🔹 Intentar certificar nuevamente
+                certification_data = record._certify_invoice_with_sat(pos_config)
+                certification_data['certified'] = True
+
+                # 🔹 Guardar los nuevos datos de certificación
+                record.write(certification_data)
+                pos_order.write(certification_data)
+
+                # 🔹 Actualizar la referencia de la factura con la certificación
+                if record.ref:
+                    record.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']} ({record.ref})"
                 else:
-                    record.message_post(body="No se pudo certificar la factura. Inténtelo de nuevo.")
-            except Exception as e:
-                record.message_post(body=f"Error al certificar: {str(e)}")
+                    record.ref = f"{certification_data['fel_reference']}-{certification_data['fel_number']}"
 
-    def _send_certification_request(self):
-        """ Simulación de una API externa para certificar la factura """
-        import random
-        return random.choice([True, False])
+                record.message_post(body="✅ La factura ha sido certificada nuevamente con éxito.")
+                _logger.info(f"✅ Factura {record.name} certificada correctamente.")
+
+            except Exception as e:
+                error_message = f"❌ Error en la certificación FEL: {str(e)}"
+                _logger.error(error_message)
+                record.message_post(body=error_message)
+
+                certification_data = {
+                    "fel_number": "",
+                    "fel_reference": "",
+                    "fel_authorization_number": "",
+                    "fel_certificate_date": "",
+                    "note": f"⚠ Error en certificación FEL: {str(e)}",
+                    "certified": False
+                }
+
+                # 🔹 Guardar estado de error en la factura y en la orden de POS
+                record.write(certification_data)
+                pos_order.write(certification_data)
+
+                # 🔹 Enviar correo de notificación de error
+                self._send_certification_error_email(record, certification_data)
+                raise UserError(_("No se pudo certificar la factura. Revisa el registro de errores."))
+
+    def _send_certification_error_email(self, record, certification_data):
+        """ Envía un correo cuando la certificación falla """
+        order_name = record.name or "Factura desconocida"
+        order_note = certification_data.get("note", "No hay detalles disponibles")
+
+        # 🔹 Crear el contenido del correo
+        email_body = f"""
+            <p><strong>ERROR DE CERTIFICACIÓN</strong></p>
+            <p><strong>Factura:</strong> {order_name}</p>
+            <p><strong>Detalles del error:</strong> {order_note}</p>
+            <p>Por favor, revise y solucione el problema.</p>
+            <p>Saludos,</p>
+            <p>El equipo de soporte</p>
+        """
+
+        # 🔹 Obtener el correo del destinatario desde la configuración
+        email_to = self.env['ir.config_parameter'].sudo().get_param('fel_error_email', 'juancarlos@olivegt.com')
+
+        mail_values = {
+            'subject': f"Error en Certificación FEL para la Factura {order_name}",
+            'email_from': self.env.user.email or 'noreply@tuempresa.com',
+            'email_to': email_to,
+            'body_html': email_body,
+        }
+        mail = self.env['mail.mail'].create(mail_values)
+        mail.send()
+
+        _logger.info(f"📩 Correo enviado a {email_to} con contenido:\n{email_body}")
+

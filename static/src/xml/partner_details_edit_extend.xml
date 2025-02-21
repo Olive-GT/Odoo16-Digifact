@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <t t-call-assets="web.assets_frontend">
-        <xpath expr="//input[@name='vat']" position="after">
+    <t t-name="custom_module.PartnerDetailsEditExtend">
+        <t t-jquery="input[name='vat']" t-operation="after">
             <div class="partner-detail">
                 <button class="button vat-verify-btn" t-on-click="verifyVAT">
                     Verificar NIF
                 </button>
             </div>
-        </xpath>
+        </t>
     </t>
 </templates>

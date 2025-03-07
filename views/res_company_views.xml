@@ -8,6 +8,7 @@
                 <group string="Configuración FEL">
                     <field name="fel_user"/>
                     <field name="fel_password"/>
+                    <field name="regimen_ISR"/>
                 </group>
             </xpath>
         </field>

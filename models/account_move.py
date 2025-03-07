@@ -208,10 +208,10 @@ class AccountMove(models.Model):
         """
         # Ejemplo de XML, se debe ajustar según los requisitos de la SAT
         # Determinar el TipoFrase y CodigoEscenario basado en el campo regimen_ISR
-        if self.company_id.regimen_ISR == 'trimestral':
+        if self.company_id.regimen_ISR == 'quarterly':
             tipo_frase = 1
             codigo_escenario = 1
-        elif self.company_id.regimen_ISR == 'mensual':
+        elif self.company_id.regimen_ISR == 'monthly':
             tipo_frase = 1
             codigo_escenario = 2
         else:

@@ -6,3 +6,8 @@ class ResCompany(models.Model):
     fel_user = fields.Char("Usuario FEL")
     fel_password = fields.Char("Contraseña FEL")
     fel_token = fields.Char("Token de Certificación")
+    regimen_ISR = fields.Selection([
+        ('none', 'Ninguno'),
+        ('quarterly', 'Trimestral'),
+        ('monthly', 'Mensual')
+    ], string="Régimen ISR")

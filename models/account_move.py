@@ -207,66 +207,93 @@ class AccountMove(models.Model):
         Genera el XML de la factura a partir de los datos proporcionados.
         """
         # Ejemplo de XML, se debe ajustar según los requisitos de la SAT
-        invoice_xml = f"""<?xml version='1.0' encoding='UTF-8'?>
-    <dte:GTDocumento xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:dte="http://www.sat.gob.gt/dte/fel/0.2.0" Version="0.1">
-        <dte:SAT ClaseDocumento="dte">
-        <dte:DTE ID="DatosCertificados">
-            <dte:DatosEmision ID="DatosEmision">
-            <dte:DatosGenerales Tipo="FACT" FechaHoraEmision="{invoice_data['fecha_emision']}"
-                CodigoMoneda="{invoice_data['moneda']}" />
-            <dte:Emisor NITEmisor="{invoice_data['nit_emisor']}" NombreEmisor="{invoice_data['nombre_emisor']}" CodigoEstablecimiento="{invoice_data['codigo_establecimiento']}"
-                NombreComercial="{invoice_data['nombre_establecimiento']}" AfiliacionIVA="GEN">
-                <dte:DireccionEmisor>
-                <dte:Direccion>{invoice_data['direccion_emisor']}</dte:Direccion>
-                <dte:CodigoPostal>0100</dte:CodigoPostal>
-                <dte:Municipio>GUATEMALA</dte:Municipio>
-                <dte:Departamento>GUATEMALA</dte:Departamento>
-                <dte:Pais>GT</dte:Pais>
-                </dte:DireccionEmisor>
-            </dte:Emisor>
-            <dte:Receptor NombreReceptor="{invoice_data['nombre_receptor']}" IDReceptor="{invoice_data['nit_receptor']}">
-                <dte:DireccionReceptor>
-                <dte:Direccion>GUATEMALA</dte:Direccion>
-                <dte:CodigoPostal>01010</dte:CodigoPostal>
-                <dte:Municipio>GUATEMALA</dte:Municipio>
-                <dte:Departamento>GUATEMALA</dte:Departamento>
-                <dte:Pais>GT</dte:Pais>
-                </dte:DireccionReceptor>
-            </dte:Receptor>
-            <dte:Frases>
-                <dte:Frase TipoFrase="1" CodigoEscenario="2"/>
-            </dte:Frases>
-            <dte:Items>
-                {"".join([f'''
-                <dte:Item NumeroLinea="{i+1}" BienOServicio="B">
-                <dte:Cantidad>{p['cantidad']:.4f}</dte:Cantidad>
-                <dte:UnidadMedida>CA</dte:UnidadMedida>
-                <dte:Descripcion>{p['descripcion']}</dte:Descripcion>
-                <dte:PrecioUnitario>{p['precio_unitario']:.4f}</dte:PrecioUnitario>
-                <dte:Precio>{p['subtotal']:.4f}</dte:Precio>
-                <dte:Descuento>0</dte:Descuento>
-                <dte:Impuestos>
-                    <dte:Impuesto>
-                    <dte:NombreCorto>IVA</dte:NombreCorto>
-                    <dte:CodigoUnidadGravable>1</dte:CodigoUnidadGravable>
-                    <dte:MontoGravable>{p['subtotal']/1.12:.4f}</dte:MontoGravable>
-                    <dte:MontoImpuesto>{(p['subtotal']/1.12) * 0.12:.4f}</dte:MontoImpuesto>
-                    </dte:Impuesto>
-                </dte:Impuestos>
-                <dte:Total>{p['subtotal']:.4f}</dte:Total>
-                </dte:Item>''' for i, p in enumerate(invoice_data['productos'])])}
-            </dte:Items>
-            <dte:Totales>
-                <dte:TotalImpuestos>
-                <dte:TotalImpuesto NombreCorto="IVA" TotalMontoImpuesto="{(sum(p['subtotal'] for p in invoice_data['productos'])/1.12)*0.12:.4f}"/>
-                </dte:TotalImpuestos>
-                <dte:GranTotal>{invoice_data['monto_total']:.4f}</dte:GranTotal>
-            </dte:Totales>
-            </dte:DatosEmision>
-        </dte:DTE>
-        </dte:SAT>
-    </dte:GTDocumento>"""
+        # Determinar el TipoFrase y CodigoEscenario basado en el campo regimen_ISR
+        if self.company_id.regimen_ISR == 'trimestral':
+            tipo_frase = 1
+            codigo_escenario = 1
+        elif self.company_id.regimen_ISR == 'mensual':
+            tipo_frase = 1
+            codigo_escenario = 2
+        else:
+            tipo_frase = None
+            codigo_escenario = None
+
+        # Generar el XML de la factura
+        invoice_xml = f"""
+        <?xml version='1.0' encoding='UTF-8'?>
+        <dte:GTDocumento 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:dte="http://www.sat.gob.gt/dte/fel/0.2.0" 
+            Version="0.1"
+        >
+            <dte:SAT ClaseDocumento="dte">
+                <dte:DTE ID="DatosCertificados">
+                    <dte:DatosEmision ID="DatosEmision">
+                    <dte:DatosGenerales 
+                        Tipo="FACT" 
+                        FechaHoraEmision="{invoice_data['fecha_emision']}"
+                        CodigoMoneda="{invoice_data['moneda']}" 
+                    />
+                    <dte:Emisor 
+                        NITEmisor="{invoice_data['nit_emisor']}" 
+                        NombreEmisor="{invoice_data['nombre_emisor']}" 
+                        CodigoEstablecimiento="{invoice_data['codigo_establecimiento']}"
+                        NombreComercial="{invoice_data['nombre_establecimiento']}" 
+                        AfiliacionIVA="GEN"
+                    >
+                        <dte:DireccionEmisor>
+                            <dte:Direccion>{invoice_data['direccion_emisor']}</dte:Direccion>
+                            <dte:CodigoPostal>0100</dte:CodigoPostal>
+                            <dte:Municipio>GUATEMALA</dte:Municipio>
+                            <dte:Departamento>GUATEMALA</dte:Departamento>
+                            <dte:Pais>GT</dte:Pais>
+                        </dte:DireccionEmisor>
+                    </dte:Emisor>
+                    <dte:Receptor 
+                        NombreReceptor="{invoice_data['nombre_receptor']}" 
+                        IDReceptor="{invoice_data['nit_receptor']}"
+                    >
+                        <dte:DireccionReceptor>
+                            <dte:Direccion>GUATEMALA</dte:Direccion>
+                            <dte:CodigoPostal>01010</dte:CodigoPostal>
+                            <dte:Municipio>GUATEMALA</dte:Municipio>
+                            <dte:Departamento>GUATEMALA</dte:Departamento>
+                            <dte:Pais>GT</dte:Pais>
+                        </dte:DireccionReceptor>
+                    </dte:Receptor>
+                    <dte:Frases>
+                        {f'<dte:Frase TipoFrase="{tipo_frase}" CodigoEscenario="{codigo_escenario}"/>' if tipo_frase and codigo_escenario else ''}
+                    </dte:Frases>
+                    <dte:Items>
+                        {"".join([f'''
+                        <dte:Item NumeroLinea="{i+1}" BienOServicio="B">
+                            <dte:Cantidad>{p['cantidad']:.4f}</dte:Cantidad>
+                            <dte:UnidadMedida>CA</dte:UnidadMedida>
+                            <dte:Descripcion>{p['descripcion']}</dte:Descripcion>
+                            <dte:PrecioUnitario>{p['precio_unitario']:.4f}</dte:PrecioUnitario>
+                            <dte:Precio>{p['subtotal']:.4f}</dte:Precio>
+                            <dte:Descuento>0</dte:Descuento>
+                            <dte:Impuestos>
+                                <dte:Impuesto>
+                                <dte:NombreCorto>IVA</dte:NombreCorto>
+                                <dte:CodigoUnidadGravable>1</dte:CodigoUnidadGravable>
+                                <dte:MontoGravable>{p['subtotal']/1.12:.4f}</dte:MontoGravable>
+                                <dte:MontoImpuesto>{(p['subtotal']/1.12) * 0.12:.4f}</dte:MontoImpuesto>
+                                </dte:Impuesto>
+                            </dte:Impuestos>
+                            <dte:Total>{p['subtotal']:.4f}</dte:Total>
+                        </dte:Item>''' for i, p in enumerate(invoice_data['productos'])])}
+                    </dte:Items>
+                    <dte:Totales>
+                        <dte:TotalImpuestos>
+                            <dte:TotalImpuesto NombreCorto="IVA" TotalMontoImpuesto="{(sum(p['subtotal'] for p in invoice_data['productos'])/1.12)*0.12:.4f}"/>
+                        </dte:TotalImpuestos>
+                        <dte:GranTotal>{invoice_data['monto_total']:.4f}</dte:GranTotal>
+                    </dte:Totales>
+                    </dte:DatosEmision>
+                </dte:DTE>
+            </dte:SAT>
+        </dte:GTDocumento>"""
         return invoice_xml.strip()
 
     def action_certify_again(self):

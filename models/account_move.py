@@ -218,6 +218,8 @@ class AccountMove(models.Model):
             tipo_frase = None
             codigo_escenario = None
 
+        _logger.info(f"Regimen ISR detectado: {self.company_id.regimen_ISR}, TipoFrase: {tipo_frase}, CodigoEscenario: {codigo_escenario}")
+
         # Generar el XML de la factura
         invoice_xml = f"""
         <?xml version='1.0' encoding='UTF-8'?>

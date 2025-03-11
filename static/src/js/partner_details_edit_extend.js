@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
-import { PartnerDetailsEdit } from "@point_of_sale/app/screens/partner_list/partner_editor";
+import { PartnerDetailsEdit } from "@point_of_sale/js/Screens/PartnerDetailsEdit/PartnerDetailsEdit";
 import rpc from 'web.rpc';
 
 patch(PartnerDetailsEdit.prototype, "digifact.partner_vat_verification", {
@@ -19,10 +19,13 @@ patch(PartnerDetailsEdit.prototype, "digifact.partner_vat_verification", {
         try {
             this.env.services.ui.block();
 
+            const session = this.env.pos ? this.env.pos.config : null;
+            const company_id = session ? session.company_id[0] : this.env.company.id;
+
             const result = await rpc('/web/dataset/call_kw', {
                 model: 'res.partner',
-                method: 'verify_partner_vat',  // Cambia este método según tu backend.
-                args: [vatNumber, this.env.pos.company.id],
+                method: 'verify_nit',
+                args: [vatNumber, company_id],
             });
 
             if (result.valid) {

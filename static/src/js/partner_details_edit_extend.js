@@ -1,51 +1,69 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
-import { PartnerDetailsEdit } from "@point_of_sale/js/Screens/PartnerDetailsEdit/PartnerDetailsEdit";
-import rpc from 'web.rpc';
+if (!odoo.__loaded_partner_vat_verification__) {
+    odoo.__loaded_partner_vat_verification__ = true;
 
-patch(PartnerDetailsEdit.prototype, "digifact.partner_vat_verification", {
-    async verifyVAT() {
-        const vatNumber = this.changes.vat || '';
+    odoo.define("digifact.partner_vat_verification", function (require) {
+        "use strict";
 
-        if (!vatNumber.trim()) {
-            await this.showPopup("ErrorPopup", {
-                title: "Error",
-                body: "Por favor, ingrese un NIT antes de verificar.",
-            });
-            return;
-        }
+        const { patch } = require("@web/core/utils/patch");
+        const PartnerDetailsEdit = require("point_of_sale.PartnerDetailsEdit");
+        const rpc = require("web.rpc");
 
-        try {
-            this.env.services.ui.block();
+        patch(PartnerDetailsEdit.prototype, "digifact_patch_partner_vat", {
+            async verifyVAT() {
+                console.warn("🔍 Ejecutando verificación de NIT...");
 
-            const session = this.env.pos ? this.env.pos.config : null;
-            const company_id = session ? session.company_id[0] : this.env.company.id;
+                const vatNumber = this.changes.vat || this.props.partner.vat;
 
-            const result = await rpc('/web/dataset/call_kw', {
-                model: 'res.partner',
-                method: 'verify_nit',
-                args: [vatNumber, company_id],
-            });
+                // 📌 Verificar si el usuario ingresó un NIT válido
+                if (!vatNumber || vatNumber.trim() === "") {
+                    this.showPopup("ErrorPopup", {
+                        title: "Error",
+                        body: "Por favor, ingrese un NIT antes de verificar.",
+                    });
+                    return;
+                }
 
-            if (result.valid) {
-                this.changes.name = result.company_name || this.changes.name;
-                this.changes.street = result.address || this.changes.street;
-                await this.render();
-            } else {
-                await this.showPopup("ErrorPopup", {
-                    title: "NIT inválido",
-                    body: result.error || "No se encontró información para este NIT.",
-                });
+                this.env.services.ui.block();
+
+                try {
+                    const session = this.env.pos ? this.env.pos.config : null;
+                    const company_id = session ? session.company_id[0] : this.env.company.id;
+
+                    const result = await rpc.query({
+                        model: "res.partner",
+                        method: "verify_nit",
+                        args: [vatNumber, company_id],
+                    });
+
+                    this.env.services.ui.unblock();
+
+                    if (result.valid) {
+                        console.warn("✅ NIT válido, actualizando datos del cliente...");
+
+                        // 📌 Rellenar automáticamente los datos en la UI
+                        this.changes.name = result.company_name || this.changes.name;
+                        this.changes.street = result.address || this.changes.street;
+                        
+                        // 📌 Forzar actualización de la UI
+                        this.render(true);
+                    } else {
+                        this.showPopup("ErrorPopup", {
+                            title: "Error en la verificación",
+                            body: result.error || "NIT inválido.",
+                        });
+                    }
+                } catch (error) {
+                    this.env.services.ui.unblock();
+                    
+                    console.error("❌ Error al verificar el NIT:", error);
+                    this.showPopup("ErrorPopup", {
+                        title: "Error de Conexión",
+                        body: "No se pudo verificar el NIT. Intente más tarde.",
+                    });
+                }
             }
-        } catch (error) {
-            console.error("Error al verificar el NIT:", error);
-            await this.showPopup("ErrorPopup", {
-                title: "Error del Servidor",
-                body: "Ocurrió un error al comunicarse con el servidor.",
-            });
-        } finally {
-            this.env.services.ui.unblock();
-        }
-    }
-});
+        });
+    });
+}

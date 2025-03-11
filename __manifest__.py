@@ -14,13 +14,13 @@
         ],
     'assets': {
         'point_of_sale._assets_pos': [
-            'digifact/static/src/js/force_invoice.js',
-            'digifact/static/src/css/hide_invoice.css',
+            'Odoo16-Digifact/static/src/js/force_invoice.js',
+            'Odoo16-Digifact/static/src/css/hide_invoice.css',
         ],
         'point_of_sale.assets': [
-            'digifact/static/src/xml/partner_details_edit.xml',
-            'digifact/static/src/css/partner_details_edit.css',
-            'digifact/static/src/js/partner_details_edit_extend.js',
+            'Odoo16-Digifact/static/src/xml/partner_details_edit.xml',
+            'Odoo16-Digifact/static/src/css/partner_details_edit.css',
+            'Odoo16-Digifact/static/src/js/partner_details_edit_extend.js',
         ],
     },
     'installable': True,

@@ -1,17 +1,15 @@
 <odoo>
-    <record id="view_pos_config_form" model="ir.ui.view">
-        <field name="name">pos.config.form</field>
+    <record id="view_pos_config_form_inherit" model="ir.ui.view">
+        <field name="name">pos.config.form.inherit</field>
         <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
-            <form string="Point of Sale Configuration">
-                <sheet>
-                    <group>
-                        <!-- Otros campos existentes -->
-                        <field name="establishment_name"/>
-                        <field name="establishment_id"/>
-                    </group>
-                </sheet>
-            </form>
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group>
+                    <field name="establishment_name"/>
+                    <field name="establishment_id"/>
+                </group>
+            </xpath>
         </field>
     </record>
 </odoo>

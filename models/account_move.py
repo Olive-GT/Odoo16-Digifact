@@ -145,7 +145,7 @@ class AccountMove(models.Model):
                     "descripcion": line.product_id.name,
                     "cantidad": line.quantity,
                     "precio_unitario": line.price_unit,
-                    "subtotal": line.price_subtotal,
+                    "subtotal": line.price_total,
                 } for line in self.invoice_line_ids
             ],
         }

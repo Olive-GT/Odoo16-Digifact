@@ -34,12 +34,19 @@ class PosOrder(models.Model):
     def _create_invoice(self, move_vals):
         """
         Modifica la función original de Odoo para enviar la factura a la SAT antes de guardarla en Odoo.
+        Solo certifica facturas normales, no reembolsos/rectificativas.
         """
         self.ensure_one()
 
         # 🔹 Llamamos a la función original de Odoo para crear la factura
         new_move = super(PosOrder, self)._create_invoice(move_vals)
         new_move.pos_config_id = self.session_id.config_id.id
+
+        # 🔹 Verificar si es un reembolso (amount_total negativo)
+        is_refund = self.amount_total < 0
+        if is_refund:
+            _logger.info(f"🔄 Omitiendo certificación FEL para reembolso: {self.name}")
+            return new_move
 
         # 🔹 Obtener la lista de compañías permitidas para certificar
         allowed_companies_str = self.env['ir.config_parameter'].sudo().get_param('certify_allowed_companies', '')
